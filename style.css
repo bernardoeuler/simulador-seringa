@@ -147,7 +147,7 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 .app:fullscreen button.btn { padding: 9px 14px; font-size: 15px; }
 .app:fullscreen button.primary { padding: 9px 22px; font-size: 17px; }
 
-/* Historinha: João e Maria no lugar da cena enquanto a história roda */
+/* Historinha: o aluno escolhido e o professor Pedro no lugar da cena enquanto a história roda */
 .stage { position: relative; }
 .historia, .guia { display: none; }
 .modo-historia #cena, .modo-historia .controls { display: none; }
@@ -170,7 +170,7 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 .boneco {
   position: absolute; bottom: 11%;
   left: calc(var(--x) * 1%); transform: translateX(-50%);
-  height: 46%; aspect-ratio: 1 / 2; max-width: 20%;
+  height: calc(46% * var(--altura, 1)); aspect-ratio: 1 / 2; max-width: 20%;
   transition: left 1.8s linear;
 }
 .boneco svg { display: block; width: 100%; height: 100%; overflow: visible; }
@@ -184,7 +184,7 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 .boneco.pulo svg { animation: fala 0.6s ease-in-out 2 alternate; }
 /* rosto: piscar e boca mexendo enquanto fala */
 .palpebra { transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); animation: pisca 4.2s infinite; }
-#maria .palpebra { animation-delay: 1.3s; }
+#professor .palpebra { animation-delay: 1.3s; }
 .boca-aberta { opacity: 0; }
 .falando .boca-aberta { animation: boca-abre 0.32s steps(1) infinite; }
 .falando .boca-fechada { animation: boca-fecha 0.32s steps(1) infinite; }
@@ -251,6 +251,35 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 .comecar:active { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--accent) 60%, #000); animation: none; }
 @keyframes chama { 50% { transform: scale(1.05); } }
 
+/* escolha do personagem, depois do COMEÇAR */
+.h-escolha {
+  position: absolute; inset: 0 0 13% 0; z-index: 1;
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(10px, 2cqw, 24px); padding: 0 3%;
+  background: color-mix(in srgb, var(--scene-top) 85%, transparent);
+}
+.historia.escolha .h-escolha { display: flex; }
+.historia.escolha .boneco, .historia.escolha .balao { display: none; }
+.h-escolha-titulo { margin: 0; font: 700 clamp(22px, 3.6cqw, 44px)/1.1 var(--font-display); color: var(--fg); text-align: center; }
+.h-escolha-lista {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(6px, 1.4cqw, 18px); width: 100%; max-width: 900px;
+}
+.card-aluno {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 6px 8px; border-radius: 14px; cursor: pointer;
+  border: 3px solid var(--line); background: var(--card); color: var(--fg);
+  transition: transform 0.15s, border-color 0.15s;
+}
+.card-aluno:hover, .card-aluno:focus-visible { border-color: var(--accent); transform: translateY(-4px); outline: none; }
+.card-aluno-figura { display: block; width: 100%; aspect-ratio: 1 / 1.25; }
+.card-aluno-figura svg { width: 100%; height: 100%; }
+.card-aluno-nome { font: 800 clamp(13px, 1.7cqw, 20px)/1.2 var(--font-body); }
+@container (max-width: 560px) {
+  .card-aluno { padding: 6px 2px; border-width: 2px; border-radius: 10px; }
+  .card-aluno-nome { font-size: 12px; }
+}
+
 /* botão de voz: discreto, no canto de baixo à esquerda do palco */
 .voz {
   position: absolute; left: 12px; bottom: 12px; z-index: 2;
@@ -289,4 +318,5 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
   .boneco svg, .boneco .perna, .boneco .braco, .palpebra, .boca-aberta, .boca-fechada { animation: none !important; }
   .balao { transition: none; }
   .comecar { animation: none; }
+  .card-aluno { transition: none; }
 }
