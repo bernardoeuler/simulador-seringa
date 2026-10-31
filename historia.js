@@ -16,7 +16,6 @@
   ];
   const MARIA = 74, ENTRADA = -12, INICIO = 22, ANDAR = 1800;
   const PAUSA = 1000; // intervalo entre uma fala e a próxima
-  const MASSINHA_MINIMA = 60; // quanto a massinha precisa sair para a história seguir
 
   // ---------- Desenho dos personagens (viewBox 100 x 200) ----------
   const AZUL_UFC = "#0b4f9c";
@@ -92,6 +91,8 @@
   const balaoNome = document.getElementById("balao-nome"), balaoTexto = document.getElementById("balao-texto");
   const btnPular = document.getElementById("pular");
   const btnRever = document.getElementById("rever"), btnUsar = document.getElementById("usar");
+  // as duas únicas ações pedidas durante a história: entrar no simulador e voltar dele
+  const btnIrSimulador = document.getElementById("ir-simulador"), btnVoltar = document.getElementById("voltar-historia");
   const guiaTexto = document.getElementById("guia-texto");
   const guiaAvatar = document.getElementById("guia-avatar");
   const btnVoz = document.getElementById("voz");
@@ -147,8 +148,66 @@
     calaBoca();
   }
 
+  // ---------- Música da tela inicial (gerada no navegador, sem arquivo) ----------
+  // O navegador só deixa tocar som depois de um clique ou tecla; até lá ela fica esperando.
+  const VOLUME_MUSICA = 0.045;
+  const PASSO_MUSICA = 0.3; // segundos por nota
+  const MELODIA = [72, 76, 79, 76, 74, 79, 81, 79, 72, 76, 79, 81, 79, 76, 74, null];
+  const BAIXO = [48, 45, 41, 43]; // dó, lá, fá, sol: um a cada 4 notas
+  let somCtx = null, musica = null;
+  const hz = (nota) => 440 * Math.pow(2, (nota - 69) / 12);
+
+  function nota(freq, inicio, dura, tipo, volume) {
+    const osc = somCtx.createOscillator(), env = somCtx.createGain();
+    osc.type = tipo; osc.frequency.value = freq;
+    env.gain.setValueAtTime(0, inicio);
+    env.gain.linearRampToValueAtTime(volume, inicio + 0.02);
+    env.gain.exponentialRampToValueAtTime(0.001, inicio + dura);
+    osc.connect(env).connect(musica.saida);
+    osc.start(inicio); osc.stop(inicio + dura + 0.05);
+  }
+
+  function agendaMusica() {
+    if (!musica || somCtx.state !== "running") return;
+    if (musica.proxima < somCtx.currentTime) musica.proxima = somCtx.currentTime + 0.05;
+    while (musica.proxima < somCtx.currentTime + 0.6) {
+      const i = musica.i % MELODIA.length, t = musica.proxima;
+      if (MELODIA[i] !== null) nota(hz(MELODIA[i]), t, PASSO_MUSICA * 1.6, "triangle", 0.6);
+      if (i % 4 === 0) nota(hz(BAIXO[(i / 4) % BAIXO.length]), t, PASSO_MUSICA * 4, "sine", 0.9);
+      musica.i++; musica.proxima += PASSO_MUSICA;
+    }
+  }
+
+  function tocaMusica() {
+    if (musica || !vozLigada || !historia.classList.contains("inicio")) return;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    somCtx = somCtx || new Ctx();
+    const saida = somCtx.createGain();
+    saida.gain.setValueAtTime(0, somCtx.currentTime);
+    saida.gain.linearRampToValueAtTime(VOLUME_MUSICA, somCtx.currentTime + 1.5);
+    saida.connect(somCtx.destination);
+    musica = { saida, i: 0, proxima: 0, timer: setInterval(agendaMusica, 150) };
+    somCtx.resume().catch(() => {});
+  }
+
+  function paraMusica() {
+    if (!musica) return;
+    const m = musica;
+    musica = null;
+    clearInterval(m.timer);
+    m.saida.gain.cancelScheduledValues(somCtx.currentTime);
+    m.saida.gain.setTargetAtTime(0, somCtx.currentTime, 0.15);
+    setTimeout(() => m.saida.disconnect(), 1000);
+  }
+
+  // primeiro clique ou tecla em qualquer lugar da página libera a música
+  ["pointerdown", "keydown"].forEach((ev) => document.addEventListener(ev, () => {
+    if (somCtx && somCtx.state === "suspended") somCtx.resume().catch(() => {});
+  }));
+
   function atualizaBotaoVoz() {
-    const rotulo = vozLigada ? "Desligar voz" : "Ligar voz";
+    const rotulo = vozLigada ? "Desligar som" : "Ligar som";
     btnVoz.setAttribute("aria-pressed", String(vozLigada));
     btnVoz.setAttribute("aria-label", rotulo);
     btnVoz.title = rotulo;
@@ -158,6 +217,7 @@
     vozLigada = !vozLigada;
     try { localStorage.setItem("seringa-voz", vozLigada ? "ligada" : "desligada"); } catch (e) { /* sem armazenamento */ }
     atualizaBotaoVoz();
+    if (vozLigada) tocaMusica(); else paraMusica();
     const f = falaAtual;
     if (!f) return;
     if (!vozLigada) {
@@ -169,7 +229,7 @@
   });
 
   // ---------- Roteiro ----------
-  let passo = -1, timer = 0, espera = 0, vigia = 0;
+  let passo = -1, timer = 0, espera = 0;
   const xJoao = () => Number(joao.style.getPropertyValue("--x"));
 
   function fala(p) {
@@ -186,7 +246,12 @@
     quem.classList.remove("pulo");
     void quem.offsetWidth; // reinicia o pulinho de quem fala
     quem.classList.add("pulo");
-    diz(p.audio, p.texto, quem, () => { if (!p.fim) proxima(); });
+    diz(p.audio, p.texto, quem, () => {
+      if (p.fim) return;
+      // antes do simulador a história para e espera o clique em "Ir para o simulador"
+      if (PASSOS[passo + 1].seringa) btnIrSimulador.hidden = false;
+      else proxima();
+    });
   }
 
   function proxima() {
@@ -205,19 +270,16 @@
   function mostra(i) {
     passo = i;
     const p = PASSOS[i];
-    clearInterval(vigia); clearTimeout(espera);
+    clearTimeout(espera);
     cala();
+    btnIrSimulador.hidden = true;
     if (p.seringa) {
+      // no simulador quem controla é o usuário: nada avança sozinho até "Continuar a história"
       app.classList.remove("modo-historia");
       app.classList.add("modo-guiado");
       guiaTexto.textContent = p.texto;
       window.Seringa.encher();
-      // depois da fala, espera alguém apertar a seringa até a massinha sair
-      diz(p.audio, p.texto, guiaAvatar, () => {
-        vigia = setInterval(() => {
-          if (window.Seringa.extrudado() > MASSINHA_MINIMA) { clearInterval(vigia); proxima(); }
-        }, 200);
-      });
+      diz(p.audio, p.texto, guiaAvatar, () => {});
       return;
     }
     app.classList.add("modo-historia");
@@ -235,9 +297,10 @@
     historia.classList.remove("sem-transicao");
   }
 
-  // tela de abertura: o clique em "Começar" também libera a voz no navegador
+  // tela inicial: o clique em "COMEÇAR" também libera as falas no navegador
   function abertura() {
     clearTimeout(timer); clearTimeout(espera); passo = -1;
+    btnIrSimulador.hidden = true;
     cala();
     colocaJoao(INICIO);
     balao.classList.remove("visivel");
@@ -246,17 +309,21 @@
     app.classList.remove("modo-guiado");
     btnRever.hidden = btnUsar.hidden = true;
     btnPular.hidden = false;
+    tocaMusica();
   }
   function comeca() {
-    clearTimeout(timer); clearTimeout(espera); clearInterval(vigia);
+    clearTimeout(timer); clearTimeout(espera);
+    paraMusica();
     historia.classList.remove("inicio");
     colocaJoao(ENTRADA);
     mostra(0);
   }
   function sai() {
-    clearTimeout(timer); clearTimeout(espera); clearInterval(vigia);
+    clearTimeout(timer); clearTimeout(espera);
     passo = -1;
+    btnIrSimulador.hidden = true;
     cala();
+    paraMusica();
     joao.classList.remove("andando");
     balao.classList.remove("visivel");
     historia.classList.remove("inicio");
@@ -267,6 +334,8 @@
   btnPular.addEventListener("click", sai);
   btnUsar.addEventListener("click", sai);
   btnRever.addEventListener("click", comeca);
+  btnIrSimulador.addEventListener("click", () => mostra(passo + 1));
+  btnVoltar.addEventListener("click", () => mostra(passo + 1));
 
   abertura();
 })();

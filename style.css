@@ -225,17 +225,31 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 .h-nav button.btn { padding: 8px 14px; font-size: 15px; }
 .h-nav button[hidden] { display: none; }
 
-/* tela de abertura */
+/* tela inicial, como o menu de um jogo: frase e botão COMEÇAR no centro */
 .h-inicio {
-  position: absolute; left: 50%; top: 10%; transform: translateX(-50%);
-  display: none; flex-direction: column; align-items: center; gap: 6px;
-  width: min(90%, 460px); padding: 20px 24px;
-  background: var(--card); border: 3px solid var(--glass-line); border-radius: 22px;
-  box-shadow: 0 6px 18px rgba(20, 30, 60, 0.15); text-align: center; cursor: default;
+  position: absolute; left: 0; right: 0; top: 0; bottom: 13%; z-index: 1;
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(16px, 3cqw, 32px); padding: 0 6%;
+  background: color-mix(in srgb, var(--scene-top) 70%, transparent);
+  text-align: center;
 }
 .historia.inicio .h-inicio { display: flex; }
-.h-inicio-titulo { margin: 0; font: 700 clamp(24px, 3.2cqw, 36px)/1.1 var(--font-display); color: var(--fg); }
-.h-inicio-sub { margin: 0 0 10px; color: var(--muted); font-weight: 700; }
+.historia.inicio .balao { display: none; }
+.h-inicio-titulo {
+  margin: 0; max-width: 18ch;
+  font: 700 clamp(28px, 5.2cqw, 64px)/1.1 var(--font-display); color: var(--fg);
+  text-wrap: balance;
+}
+.comecar {
+  font: 800 clamp(20px, 2.8cqw, 34px)/1 var(--font-body); letter-spacing: 0.08em;
+  padding: 0.75em 2.2em; border-radius: 999px; cursor: pointer;
+  border: 0; background: var(--accent); color: var(--accent-ink);
+  box-shadow: 0 6px 0 color-mix(in srgb, var(--accent) 60%, #000);
+  animation: chama 1.6s ease-in-out infinite;
+}
+.comecar:hover { filter: brightness(1.06); }
+.comecar:active { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--accent) 60%, #000); animation: none; }
+@keyframes chama { 50% { transform: scale(1.05); } }
 
 /* botão de voz: discreto, no canto de baixo à esquerda do palco */
 .voz {
@@ -274,4 +288,5 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
   .boneco { transition: none; }
   .boneco svg, .boneco .perna, .boneco .braco, .palpebra, .boca-aberta, .boca-fechada { animation: none !important; }
   .balao { transition: none; }
+  .comecar { animation: none; }
 }

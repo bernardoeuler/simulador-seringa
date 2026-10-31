@@ -29,17 +29,17 @@
           <p class="balao-texto" id="balao-texto"></p>
         </div>
         <div class="h-inicio" id="inicio">
-          <p class="h-inicio-titulo">O que é extrusão?</p>
-          <p class="h-inicio-sub">Uma historinha com o João e a Maria</p>
-          <button class="btn primary" id="comecar" type="button">Começar história</button>
+          <p class="h-inicio-titulo">Extrusão, Tópicos de Fabricação - UFC</p>
+          <button class="comecar" id="comecar" type="button">COMEÇAR</button>
         </div>
         <div class="h-nav">
           <button class="btn" id="pular" type="button">Pular história</button>
+          <button class="btn primary" id="ir-simulador" type="button" hidden>Ir para o simulador</button>
           <button class="btn" id="rever" type="button" hidden>Ver de novo</button>
           <button class="btn primary" id="usar" type="button" hidden>Usar o simulador</button>
         </div>
       </div>
-      <button class="voz" id="voz" type="button" aria-pressed="true" aria-label="Desligar voz" title="Desligar voz">
+      <button class="voz" id="voz" type="button" aria-pressed="true" aria-label="Desligar som" title="Desligar som">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>
           <g class="voz-on" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 9.5a3.5 3.5 0 0 1 0 5"/><path d="M18.5 7a7 7 0 0 1 0 10"/></g>
@@ -51,6 +51,7 @@
     <div class="guia" id="guia">
       <div class="guia-avatar" id="guia-avatar" aria-hidden="true"></div>
       <p class="guia-texto"><strong>Maria:</strong> <span id="guia-texto"></span></p>
+      <button class="btn primary" id="voltar-historia" type="button">Continuar a história</button>
     </div>
 
     <div class="controls">

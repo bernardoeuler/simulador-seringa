@@ -6,11 +6,12 @@ Simulador interativo para apresentação em sala de aula: uma seringa cheia de m
 
 Ao abrir a página, começa uma historinha que apresenta a extrusão. O João, estudante de Engenharia de Produção da UFC, campus Russas, tem dúvida sobre o processo. A Maria explica com a seringa de massinha e depois liga cada parte ao processo industrial: o êmbolo é o pistão, a massinha é o material e o bico é a matriz.
 
-- A história abre com o botão **Começar história**. O clique é necessário porque o navegador só deixa a voz tocar depois de uma interação.
+- A página abre numa tela inicial, como a de um jogo, com a frase "Extrusão, Tópicos de Fabricação - UFC" e o botão **COMEÇAR**. O clique é necessário porque o navegador só deixa o som tocar depois de uma interação.
+- Na tela inicial toca uma musiquinha baixa, gerada pelo próprio navegador. Ela começa no primeiro clique ou tecla na página e para quando a história começa.
 - Os dois usam a camisa branca da UFC, e cada fala toca um áudio gravado, que fica na pasta `audio/` (numerado na ordem da história).
-- O botão do alto-falante, no canto de baixo à esquerda, liga e desliga a voz. A escolha fica salva no navegador.
+- O botão do alto-falante, no canto de baixo à esquerda, liga e desliga o som (falas e música). A escolha fica salva no navegador.
 - Depois do **Começar**, a história segue sozinha: cada fala começa 1 s depois que a anterior termina.
-- Na parte da seringa, a história espera alguém apertar até a massinha sair e segue 1 s depois.
+- Antes do simulador, a história para e mostra **Ir para o simulador**. No simulador, quem controla é você; nada avança sozinho. Para seguir, clique em **Continuar a história**. Essas são as únicas ações pedidas depois do **COMEÇAR**.
 - **Pular história** vai direto para o simulador. Para ver a história de novo, recarregue a página.
 
 ## Como usar
