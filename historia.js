@@ -30,6 +30,7 @@
   ];
   const PROFESSOR = 74, ENTRADA = -12, INICIO = 22, ANDAR = 1800;
   const PAUSA = 1000; // intervalo entre uma fala e a próxima
+  const VELOCIDADE = 1.6; // velocidade das falas (1 = normal do navegador)
 
   // ---------- Desenho (viewBox 100 x 200) ----------
   const AZUL_UFC = "#0b4f9c";
@@ -292,7 +293,7 @@
     f.el.classList.add("falando");
     bocaTimer = setTimeout(() => termina(f), ms);
   }
-  const duracaoEstimada = (texto) => 600 + texto.length * 62;
+  const duracaoEstimada = (texto) => 600 + (texto.length * 62) / VELOCIDADE;
 
   function silencia() {
     if (!falaAtual) return;
@@ -315,7 +316,7 @@
       const v = vozes[p.sexo];
       if (v) u.voice = v;
       u.pitch = tom(p);
-      u.rate = 1;
+      u.rate = VELOCIDADE;
       if (i === partes.length - 1) u.onend = () => termina(f);
       u.onerror = (e) => { if (e.error !== "interrupted" && e.error !== "canceled" && falaAtual === f) mexeBoca(f, 800); };
       speechSynthesis.speak(u);
