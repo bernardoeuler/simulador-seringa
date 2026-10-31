@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seringa de Massinha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="page">
+  <header>
+    <p class="eyebrow">Simulador para a aula</p>
+    <h1>Seringa de Massinha</h1>
+    <p class="lede">Escolha o formato do bico, segure o botão e veja a massinha de modelar sair da seringa no formato da ponta.</p>
+  </header>
+
+  <section class="app" id="app">
+    <div class="stage">
+      <canvas id="cena" role="img" aria-label="Seringa com massinha de modelar. Ao apertar, a massinha sai pelo bico no formato escolhido."></canvas>
+    </div>
+
+    <div class="controls">
+      <div class="group">
+        <h2>Bico da seringa</h2>
+        <div class="chips" id="bicos"></div>
+      </div>
+      <div class="group">
+        <h2>Cor da massinha</h2>
+        <div class="swatches" id="cores"></div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="apertar" type="button">Segure para apertar</button>
+        <button class="btn" id="tudo" type="button">Apertar tudo</button>
+        <button class="btn" id="encher" type="button">Encher de novo</button>
+        <button class="btn" id="tela" type="button">Tela cheia</button>
+      </div>
+      <p class="status" id="status" aria-live="polite"></p>
+      <p class="keys">Atalhos: segure espaço para apertar · R enche de novo · 1 a 7 trocam o bico. Trocar o bico no meio do caminho muda o formato do pedaço que sai depois.</p>
+    </div>
+  </section>
+</main>
+<script src="script.js"></script>
+</body>
+</html>
