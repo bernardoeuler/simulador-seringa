@@ -272,8 +272,9 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
   transition: transform 0.15s, border-color 0.15s;
 }
 .card-aluno:hover, .card-aluno:focus-visible { border-color: var(--accent); transform: translateY(-4px); outline: none; }
-.card-aluno-figura { display: block; width: 100%; aspect-ratio: 1 / 1.25; }
-.card-aluno-figura svg { width: 100%; height: 100%; }
+/* a figura acompanha a altura do personagem (os mais altos aparecem maiores) */
+.card-aluno-figura { display: flex; align-items: flex-end; width: 100%; aspect-ratio: 1 / 1.25; }
+.card-aluno-figura svg { width: 100%; height: calc(90% * var(--altura, 1)); }
 .card-aluno-nome { font: 800 clamp(13px, 1.7cqw, 20px)/1.2 var(--font-body); }
 @container (max-width: 560px) {
   .card-aluno { padding: 6px 2px; border-width: 2px; border-radius: 10px; }

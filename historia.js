@@ -8,9 +8,10 @@
   // cabelo: "curto", "topete", "liso", "ondulado", "black" (black power), "cacheado", "rabo" (rabo de cavalo)
   // oculos: false ou a cor da armação; altura: 1 = normal, maior que 1 = mais alto
   const ALUNOS = [
-    { id: "livia", nome: "Lívia", sexo: "f", pele: "#b07a52", cabelo: "ondulado", longo: true, corCabelo: "#231711", oculos: false, altura: 1, calca: "#3b5b8c" },
-    { id: "lidia", nome: "Lídia", sexo: "f", pele: "#a8714a", cabelo: "ondulado", repartido: true, corCabelo: "#1e1410", oculos: "#b89a6a", altura: 1, calca: "#2f4a78" },
-    { id: "davi", nome: "Davi", sexo: "m", pele: "#edc4a2", cabelo: "topete", corCabelo: "#2a1d16", oculos: false, bigode: true, altura: 1, calca: "#34405e" },
+    // Lívia e Lídia são gêmeas idênticas: a Lídia se diferencia pelos óculos e pelo cabelo repartido ao meio
+    { id: "livia", nome: "Lívia", sexo: "f", pele: "#ac774f", cabelo: "ondulado", longo: true, corCabelo: "#201510", oculos: false, altura: 0.92, calca: "#3b5b8c" },
+    { id: "lidia", nome: "Lídia", sexo: "f", pele: "#ac774f", cabelo: "ondulado", longo: true, repartido: true, corCabelo: "#201510", oculos: "#b89a6a", altura: 0.92, calca: "#3b5b8c" },
+    { id: "davi", nome: "Davi", sexo: "m", pele: "#edc4a2", cabelo: "topete", corCabelo: "#2a1d16", oculos: false, bigode: true, altura: 1.1, calca: "#34405e" },
     { id: "eduarda", nome: "Eduarda", sexo: "f", pele: "#f3d0b6", cabelo: "liso", corCabelo: "#1a1412", oculos: false, altura: 1, calca: "#3b5b8c" },
     { id: "marcele", nome: "Marcele", sexo: "f", pele: "#d8a17a", cabelo: "black", corCabelo: "#141010", oculos: false, altura: 1.07, calca: "#2f4a78" },
   ];
@@ -414,7 +415,7 @@
   ALUNOS.forEach((a) => {
     const btn = document.createElement("button");
     btn.type = "button"; btn.className = "card-aluno"; btn.id = "aluno-" + a.id;
-    btn.innerHTML = `<span class="card-aluno-figura">${desenho(a)}</span><span class="card-aluno-nome">${a.nome}</span>`;
+    btn.innerHTML = `<span class="card-aluno-figura" style="--altura: ${a.altura}">${desenho(a)}</span><span class="card-aluno-nome">${a.nome}</span>`;
     btn.addEventListener("click", () => { vesteAluno(a); comeca(); });
     listaAlunos.appendChild(btn);
   });
