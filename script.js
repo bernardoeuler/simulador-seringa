@@ -309,7 +309,7 @@
     const vazia = estado.hx >= HX1 - 0.5;
     let txt = "Segure o botão (ou a barra de espaço) para apertar";
     if (vazia) txt = "A seringa esvaziou! Clique em “Encher de novo”";
-    else if (ext > 4) txt = `A massinha sai com o formato do bico: ${estado.bico.nome.toLowerCase()}!`;
+    else if (ext > 4) txt = `A massinha sai com o formato do bico: ${estado.bico.nome.toLowerCase()}`;
     ctx.font = `800 32px ${tema.fonte}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
     const w = ctx.measureText(txt).width + 60;
     ctx.fillStyle = tema.card; retArred(LW / 2 - w / 2, 722, w, 58, 29); ctx.fill();
