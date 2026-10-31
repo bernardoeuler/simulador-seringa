@@ -119,7 +119,6 @@
   const estado = {
     bico: BICOS[0], cor: CORES[0].hex,
     hx: HX0, apertando: false, auto: false,
-    segs: [{ inicio: 0, cor: CORES[0].hex }],
     t: 0,
   };
   const extrudado = () => (estado.hx - HX0) * K;
@@ -180,27 +179,21 @@
 
   function desenhaMassinhaFora(ext) {
     if (ext < 2) return;
-    const segs = estado.segs;
-    for (let k = 0; k < segs.length; k++) {
-      const s0 = segs[k].inicio, s1 = k + 1 < segs.length ? segs[k + 1].inicio : ext;
-      if (s1 - s0 < 0.5 || s0 >= ext) continue;
-      const i0 = indice(s0), i1 = Math.max(i0 + 1, Math.min(indice(Math.min(s1, ext)) + (k + 1 < segs.length ? 1 : 0), CAM.length - 1));
-      const bico = estado.bico, cor = segs[k].cor;
-      // contorno
-      ctx.fillStyle = tom(cor, 0.5);
-      faixa(i0, i1, bico.vmin * R - 1.6, bico.vmax * R + 1.6);
-      bico.faces.forEach((f) => {
-        ctx.fillStyle = tom(cor, f.brilho);
-        faixa(i0, i1, f.v1 * R - 0.4, f.v2 * R + 0.4);
-      });
-    }
+    const bico = estado.bico, cor = estado.cor;
+    const i1 = Math.max(1, Math.min(indice(ext), CAM.length - 1));
+    // contorno
+    ctx.fillStyle = tom(cor, 0.5);
+    faixa(0, i1, bico.vmin * R - 1.6, bico.vmax * R + 1.6);
+    bico.faces.forEach((f) => {
+      ctx.fillStyle = tom(cor, f.brilho);
+      faixa(0, i1, f.v1 * R - 0.4, f.v2 * R + 0.4);
+    });
     // ponta (tampa) mostrando o formato
-    const ult = segs[segs.length - 1];
     const i = Math.min(indice(ext), CAM.length - 1);
     const p = CAM[i], t = TAN[i];
     formaEm(p[0] + t[0] * 2, p[1] + t[1] * 2, estado.bico.pts, R + 1, t[0], t[1], 0.5);
-    ctx.fillStyle = tom(ult.cor, 1.12); ctx.fill();
-    ctx.lineWidth = 2.5; ctx.strokeStyle = tom(ult.cor, 0.5); ctx.stroke();
+    ctx.fillStyle = tom(cor, 1.12); ctx.fill();
+    ctx.lineWidth = 2.5; ctx.strokeStyle = tom(cor, 0.5); ctx.stroke();
   }
 
   function desenhaSeringa(now) {
@@ -285,15 +278,14 @@
     ctx.strokeStyle = vazia ? "#2a3044" : tom(estado.cor, 0.5); ctx.lineWidth = 3; ctx.stroke();
 
     if (ext > 4) {
-      const ult = estado.segs[estado.segs.length - 1];
       const c2 = 1470;
       ctx.fillStyle = tema.ink; ctx.font = `800 60px ${font}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.fillText("=", (cx + c2) / 2, cy + 2); ctx.textBaseline = "alphabetic";
       disco(c2, "Massinha", "(cortada)");
       formaEm(c2, cy, estado.bico.pts, 50, 1, 0, 1);
-      ctx.fillStyle = tom(ult.cor, 1); ctx.fill(); ctx.strokeStyle = tom(ult.cor, 0.5); ctx.lineWidth = 3; ctx.stroke();
+      ctx.fillStyle = tom(estado.cor, 1); ctx.fill(); ctx.strokeStyle = tom(estado.cor, 0.5); ctx.lineWidth = 3; ctx.stroke();
       formaEm(c2 - 5, cy - 5, estado.bico.pts, 22, 1, 0, 1);
-      ctx.fillStyle = tom(ult.cor, 1.2); ctx.fill();
+      ctx.fillStyle = tom(estado.cor, 1.2); ctx.fill();
     }
   }
 
@@ -348,13 +340,6 @@
   const status = document.getElementById("status");
   function avisa(msg) { status.textContent = msg; }
 
-  function novoSegmento() {
-    const ext = extrudado();
-    const ult = estado.segs[estado.segs.length - 1];
-    if (ext - ult.inicio < 3) ult.cor = estado.cor;
-    else estado.segs.push({ inicio: ext, cor: estado.cor });
-  }
-
   const boxBicos = document.getElementById("bicos");
   BICOS.forEach((b, i) => {
     const btn = document.createElement("button");
@@ -380,7 +365,6 @@
     btn.addEventListener("click", () => {
       estado.cor = c.hex;
       boxCores.querySelectorAll(".swatch").forEach((s, j) => s.setAttribute("aria-pressed", j === i ? "true" : "false"));
-      novoSegmento();
     });
     boxCores.appendChild(btn);
   });
@@ -402,7 +386,6 @@
   document.getElementById("tudo").addEventListener("click", () => { if (estado.hx < HX1) { estado.auto = true; avisa(""); } });
   function encher() {
     estado.hx = HX0; estado.auto = false; estado.apertando = false;
-    estado.segs = [{ inicio: 0, cor: estado.cor }];
     avisa("Seringa cheia de novo.");
   }
   document.getElementById("encher").addEventListener("click", encher);

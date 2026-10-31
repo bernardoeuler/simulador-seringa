@@ -13,7 +13,7 @@ Abra o `index.html` no navegador (não precisa instalar nada).
 - **Encher de novo** (tecla R): recomeça.
 - **Tela cheia**: para mostrar no projetor.
 
-Trocar o bico muda o formato de toda a massinha. Trocar a cor muda só o pedaço que sai depois.
+Trocar o bico ou a cor muda o formato e a cor de toda a massinha.
 
 ## Arquivos
 
