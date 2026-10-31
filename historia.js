@@ -147,8 +147,66 @@
     calaBoca();
   }
 
+  // ---------- Música da tela inicial (gerada no navegador, sem arquivo) ----------
+  // O navegador só deixa tocar som depois de um clique ou tecla; até lá ela fica esperando.
+  const VOLUME_MUSICA = 0.045;
+  const PASSO_MUSICA = 0.3; // segundos por nota
+  const MELODIA = [72, 76, 79, 76, 74, 79, 81, 79, 72, 76, 79, 81, 79, 76, 74, null];
+  const BAIXO = [48, 45, 41, 43]; // dó, lá, fá, sol: um a cada 4 notas
+  let somCtx = null, musica = null;
+  const hz = (nota) => 440 * Math.pow(2, (nota - 69) / 12);
+
+  function nota(freq, inicio, dura, tipo, volume) {
+    const osc = somCtx.createOscillator(), env = somCtx.createGain();
+    osc.type = tipo; osc.frequency.value = freq;
+    env.gain.setValueAtTime(0, inicio);
+    env.gain.linearRampToValueAtTime(volume, inicio + 0.02);
+    env.gain.exponentialRampToValueAtTime(0.001, inicio + dura);
+    osc.connect(env).connect(musica.saida);
+    osc.start(inicio); osc.stop(inicio + dura + 0.05);
+  }
+
+  function agendaMusica() {
+    if (!musica || somCtx.state !== "running") return;
+    if (musica.proxima < somCtx.currentTime) musica.proxima = somCtx.currentTime + 0.05;
+    while (musica.proxima < somCtx.currentTime + 0.6) {
+      const i = musica.i % MELODIA.length, t = musica.proxima;
+      if (MELODIA[i] !== null) nota(hz(MELODIA[i]), t, PASSO_MUSICA * 1.6, "triangle", 0.6);
+      if (i % 4 === 0) nota(hz(BAIXO[(i / 4) % BAIXO.length]), t, PASSO_MUSICA * 4, "sine", 0.9);
+      musica.i++; musica.proxima += PASSO_MUSICA;
+    }
+  }
+
+  function tocaMusica() {
+    if (musica || !vozLigada || !historia.classList.contains("inicio")) return;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    somCtx = somCtx || new Ctx();
+    const saida = somCtx.createGain();
+    saida.gain.setValueAtTime(0, somCtx.currentTime);
+    saida.gain.linearRampToValueAtTime(VOLUME_MUSICA, somCtx.currentTime + 1.5);
+    saida.connect(somCtx.destination);
+    musica = { saida, i: 0, proxima: 0, timer: setInterval(agendaMusica, 150) };
+    somCtx.resume().catch(() => {});
+  }
+
+  function paraMusica() {
+    if (!musica) return;
+    const m = musica;
+    musica = null;
+    clearInterval(m.timer);
+    m.saida.gain.cancelScheduledValues(somCtx.currentTime);
+    m.saida.gain.setTargetAtTime(0, somCtx.currentTime, 0.15);
+    setTimeout(() => m.saida.disconnect(), 1000);
+  }
+
+  // primeiro clique ou tecla em qualquer lugar da página libera a música
+  ["pointerdown", "keydown"].forEach((ev) => document.addEventListener(ev, () => {
+    if (somCtx && somCtx.state === "suspended") somCtx.resume().catch(() => {});
+  }));
+
   function atualizaBotaoVoz() {
-    const rotulo = vozLigada ? "Desligar voz" : "Ligar voz";
+    const rotulo = vozLigada ? "Desligar som" : "Ligar som";
     btnVoz.setAttribute("aria-pressed", String(vozLigada));
     btnVoz.setAttribute("aria-label", rotulo);
     btnVoz.title = rotulo;
@@ -158,6 +216,7 @@
     vozLigada = !vozLigada;
     try { localStorage.setItem("seringa-voz", vozLigada ? "ligada" : "desligada"); } catch (e) { /* sem armazenamento */ }
     atualizaBotaoVoz();
+    if (vozLigada) tocaMusica(); else paraMusica();
     const f = falaAtual;
     if (!f) return;
     if (!vozLigada) {
@@ -235,7 +294,7 @@
     historia.classList.remove("sem-transicao");
   }
 
-  // tela de abertura: o clique em "Começar" também libera a voz no navegador
+  // tela inicial: o clique em "COMEÇAR" também libera as falas no navegador
   function abertura() {
     clearTimeout(timer); clearTimeout(espera); passo = -1;
     cala();
@@ -246,9 +305,11 @@
     app.classList.remove("modo-guiado");
     btnRever.hidden = btnUsar.hidden = true;
     btnPular.hidden = false;
+    tocaMusica();
   }
   function comeca() {
     clearTimeout(timer); clearTimeout(espera); clearInterval(vigia);
+    paraMusica();
     historia.classList.remove("inicio");
     colocaJoao(ENTRADA);
     mostra(0);
@@ -257,6 +318,7 @@
     clearTimeout(timer); clearTimeout(espera); clearInterval(vigia);
     passo = -1;
     cala();
+    paraMusica();
     joao.classList.remove("andando");
     balao.classList.remove("visivel");
     historia.classList.remove("inicio");
