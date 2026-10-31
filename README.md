@@ -4,7 +4,7 @@ Simulador interativo para apresentação em sala de aula: uma seringa cheia de m
 
 ## Historinha
 
-Ao abrir a página, começa uma historinha que apresenta a extrusão. Depois do **COMEÇAR**, você escolhe o aluno: Livia, Lídia, Davi, Eduarda ou Marcele. O aluno, estudante de Engenharia de Produção da UFC, campus Russas, tem dúvida sobre o processo. O professor Pedro explica com a seringa de massinha e depois liga cada parte ao processo industrial: o êmbolo é o pistão, a massinha é o material e o bico é a matriz.
+Ao abrir a página, começa uma historinha que apresenta a extrusão. Depois do **COMEÇAR**, você escolhe o aluno: Lívia, Lídia, Davi, Eduarda ou Marcele. O aluno, estudante de Engenharia de Produção da UFC, campus Russas, tem dúvida sobre o processo. O professor Pedro explica com a seringa de massinha e depois liga cada parte ao processo industrial: o êmbolo é o pistão, a massinha é o material e o bico é a matriz.
 
 - A página abre numa tela inicial, como a de um jogo, com a frase "Extrusão, Tópicos de Fabricação - UFC" e o botão **COMEÇAR**. O clique é necessário porque o navegador só deixa o som tocar depois de uma interação.
 - Na tela inicial toca uma musiquinha baixa, gerada pelo próprio navegador. Ela começa no primeiro clique ou tecla na página e para quando a história começa.

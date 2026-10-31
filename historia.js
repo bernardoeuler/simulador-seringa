@@ -5,16 +5,16 @@
   "use strict";
 
   // ---------- Personagens ----------
-  // cabelo: "curto", "liso", "black" (black power), "cacheado", "rabo" (rabo de cavalo)
-  // altura: 1 = normal; maior que 1 = mais alto
+  // cabelo: "curto", "topete", "liso", "ondulado", "black" (black power), "cacheado", "rabo" (rabo de cavalo)
+  // oculos: false ou a cor da armação; altura: 1 = normal, maior que 1 = mais alto
   const ALUNOS = [
-    { id: "livia", nome: "Livia", sexo: "f", pele: "#f1c7a3", cabelo: "liso", corCabelo: "#5a3a22", oculos: false, altura: 1, calca: "#3b5b8c" },
-    { id: "lidia", nome: "Lídia", sexo: "f", pele: "#c68a5e", cabelo: "cacheado", corCabelo: "#2e1d14", oculos: false, altura: 0.97, calca: "#2f4a78" },
-    { id: "davi", nome: "Davi", sexo: "m", pele: "#d9a47a", cabelo: "curto", corCabelo: "#1f1712", oculos: false, altura: 1.03, calca: "#34405e" },
-    { id: "eduarda", nome: "Eduarda", sexo: "f", pele: "#f3cfb2", cabelo: "rabo", corCabelo: "#a8743c", oculos: false, altura: 0.98, calca: "#3b5b8c" },
+    { id: "livia", nome: "Lívia", sexo: "f", pele: "#b07a52", cabelo: "ondulado", longo: true, corCabelo: "#231711", oculos: false, altura: 1, calca: "#3b5b8c" },
+    { id: "lidia", nome: "Lídia", sexo: "f", pele: "#a8714a", cabelo: "ondulado", repartido: true, corCabelo: "#1e1410", oculos: "#b89a6a", altura: 1, calca: "#2f4a78" },
+    { id: "davi", nome: "Davi", sexo: "m", pele: "#edc4a2", cabelo: "topete", corCabelo: "#2a1d16", oculos: false, bigode: true, altura: 1, calca: "#34405e" },
+    { id: "eduarda", nome: "Eduarda", sexo: "f", pele: "#f3d0b6", cabelo: "liso", corCabelo: "#1a1412", oculos: false, altura: 1, calca: "#3b5b8c" },
     { id: "marcele", nome: "Marcele", sexo: "f", pele: "#d8a17a", cabelo: "black", corCabelo: "#141010", oculos: false, altura: 1.07, calca: "#2f4a78" },
   ];
-  const PEDRO = { id: "pedro", nome: "Professor Pedro", curto: "Prof. Pedro", sexo: "m", pele: "#f4d2b8", cabelo: "curto", corCabelo: "#6b5446", oculos: true, altura: 1.04, calca: "#2b2f3a", roupa: "professor" };
+  const PEDRO = { id: "pedro", nome: "Professor Pedro", curto: "Prof. Pedro", sexo: "m", pele: "#f4d2b8", cabelo: "curto", corCabelo: "#6b5446", oculos: "#2b2b2b", altura: 1.04, calca: "#2b2f3a", roupa: "professor" };
 
   // texto de cada passo; "aluno" é quem foi escolhido
   const PASSOS = [
@@ -61,6 +61,33 @@
             <path d="M65.5 26 Q69 48 66 64 Q63 67 61 63 Q64 46 62.5 30 Z" fill="${c}"/>`,
           orelhas: false,
         };
+      case "ondulado": {
+        // longo e ondulado, passando dos ombros; "longo" desce até a cintura e tem mais volume
+        const fim = p.longo ? 92 : 74, abre = p.longo ? 4 : 0;
+        let ondas = "";
+        const ys = p.longo ? [50, 60, 70, 80, 89] : [52, 62, 71];
+        ys.forEach((y) => {
+          ondas += `<circle cx="${31 - abre}" cy="${y}" r="${5.2 + abre / 3}" fill="${c}"/><circle cx="${69 + abre}" cy="${y}" r="${5.2 + abre / 3}" fill="${c}"/>`;
+        });
+        const franja = p.repartido
+          ? `<path d="M34.5 30 Q33 9 50 10 Q67 9 65.5 30 Q62 19 52 14 L50 13 L48 14 Q38 19 34.5 30 Z" fill="${c}"/>`
+          : `<path d="M34.5 29 Q33 9 50 9.5 Q66 10 65.5 29 Q63 19 56 17 Q51 22 44 21 Q38 23 34.5 29 Z" fill="${c}"/>`;
+        return {
+          atras: `<path d="M33 30 Q${30 - abre} 8 50 ${8 - abre} Q${70 + abre} 8 67 30 Q${73 + abre} 52 ${69 + abre} ${fim} Q63 ${fim + 5} 58 ${fim - 2} L58 46 L42 46 L42 ${fim - 2} Q37 ${fim + 5} ${31 - abre} ${fim} Q${27 - abre} 52 33 30 Z" fill="${c}"/>${ondas}`,
+          frente: `${franja}
+            <path d="M34.5 26 Q30 36 33.5 44 Q30 52 34 62 Q37 66 39 62 Q36 54 38.5 46 Q35.5 38 37.5 30 Z" fill="${c}"/>
+            <path d="M65.5 26 Q70 36 66.5 44 Q70 52 66 62 Q63 66 61 62 Q64 54 61.5 46 Q64.5 38 62.5 30 Z" fill="${c}"/>`,
+          orelhas: false,
+        };
+      }
+      case "topete":
+        // curto nas laterais, com volume em cima
+        return {
+          atras: "",
+          frente: `<path d="M34.5 29 Q32 9 48 5 Q60 3 65 13 Q68 19 65.5 29 Q64 21 59 19 Q55 15 49 16 Q42 16 38 22 Q36 25 34.5 29 Z" fill="${c}"/>
+            <path d="M41 14 Q48 2 60 6 Q53 7 50 12 Z" fill="${c}"/>`,
+          orelhas: true,
+        };
       case "black": {
         // black power: volume redondo em volta da cabeça, com textura de cachos na borda
         let cachos = "";
@@ -103,8 +130,8 @@
     }
   }
 
-  function oculos() {
-    return `<g fill="rgba(255,255,255,0.18)" stroke="#2b2b2b" stroke-width="1.2">
+  function oculos(cor) {
+    return `<g fill="rgba(255,255,255,0.18)" stroke="${cor}" stroke-width="1.1">
       <rect x="39" y="25.5" width="10" height="7.5" rx="2.5"/>
       <rect x="51" y="25.5" width="10" height="7.5" rx="2.5"/>
       <path d="M49 28.5 Q50 27.5 51 28.5 M39 28 L35.5 27 M61 28 L64.5 27" fill="none"/>
@@ -169,7 +196,8 @@
       <path d="M53 23 Q56.5 21.5 60 23.5" fill="none" stroke="${p.corCabelo}" stroke-width="1.6" stroke-linecap="round"/>
       ${olho(44, p)}${olho(56, p)}
       ${p.sexo === "f" ? `<path d="M40.3 27.6 L39 26.6 M59.7 27.6 L61 26.6" stroke="#1b1b1b" stroke-width="0.8" stroke-linecap="round"/>` : ""}
-      ${p.oculos ? oculos() : ""}
+      ${p.oculos ? oculos(p.oculos) : ""}
+      ${p.bigode ? `<path d="M45.8 37.9 Q50 36.2 54.2 37.9" fill="none" stroke="${p.corCabelo}" stroke-width="1.3" stroke-linecap="round"/>` : ""}
       <path d="M50 31 Q48.3 35 49.4 35.8 Q50.6 36.3 52 35.4" fill="none" stroke="${sombra}" stroke-width="1.1" stroke-linecap="round"/>
       <circle cx="40" cy="36" r="2.6" fill="#f08a8a" opacity="0.35"/>
       <circle cx="60" cy="36" r="2.6" fill="#f08a8a" opacity="0.35"/>
