@@ -94,10 +94,10 @@
         let cachos = "";
         for (let i = 0; i < 18; i++) {
           const a = (Math.PI * 2 * i) / 18;
-          cachos += `<circle cx="${(50 + Math.cos(a) * 24).toFixed(1)}" cy="${(24 + Math.sin(a) * 22).toFixed(1)}" r="5.5" fill="${c}"/>`;
+          cachos += `<circle cx="${(50 + Math.cos(a) * 24).toFixed(1)}" cy="${(25 + Math.sin(a) * 19).toFixed(1)}" r="5.5" fill="${c}"/>`;
         }
         return {
-          atras: `<ellipse cx="50" cy="24" rx="25" ry="23" fill="${c}"/>${cachos}`,
+          atras: `<ellipse cx="50" cy="25" rx="25" ry="21" fill="${c}"/>${cachos}`,
           frente: `<path d="M35 25 Q37 13 50 13 Q63 13 65 25 Q60 18 54 19 Q50 16 46 19 Q40 18 35 25 Z" fill="${c}"/>`,
           orelhas: false,
         };
