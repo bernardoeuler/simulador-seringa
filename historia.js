@@ -15,7 +15,8 @@
     { quem: "joao", joao: 50, audio: "audio/8-joao-agora-entendi.mp3", texto: "Agora entendi! Obrigado, Maria!", fim: true },
   ];
   const MARIA = 74, ENTRADA = -12, INICIO = 22, ANDAR = 1800;
-  const MASSINHA_MINIMA = 60; // quanto a massinha precisa sair para liberar o "Continuar"
+  const PAUSA = 1000; // intervalo entre uma fala e a próxima
+  const MASSINHA_MINIMA = 60; // quanto a massinha precisa sair para a história seguir
 
   // ---------- Desenho dos personagens (viewBox 100 x 200) ----------
   const AZUL_UFC = "#0b4f9c";
@@ -89,9 +90,9 @@
   const joao = document.getElementById("joao"), maria = document.getElementById("maria");
   const balao = document.getElementById("balao");
   const balaoNome = document.getElementById("balao-nome"), balaoTexto = document.getElementById("balao-texto");
-  const btnProximo = document.getElementById("proximo"), btnPular = document.getElementById("pular");
+  const btnPular = document.getElementById("pular");
   const btnRever = document.getElementById("rever"), btnUsar = document.getElementById("usar");
-  const guiaTexto = document.getElementById("guia-texto"), btnContinuar = document.getElementById("continuar");
+  const guiaTexto = document.getElementById("guia-texto");
   const guiaAvatar = document.getElementById("guia-avatar");
   const btnVoz = document.getElementById("voz");
   const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -112,22 +113,32 @@
     [joao, maria, guiaAvatar].forEach((el) => el.classList.remove("falando"));
   }
 
-  // sem som (mudo ou áudio indisponível), a boca mexe por um tempo proporcional ao texto
-  function mexeBoca(texto, el) {
+  function termina(f) {
+    if (falaAtual !== f) return;
+    falaAtual = null;
     calaBoca();
-    el.classList.add("falando");
-    bocaTimer = setTimeout(calaBoca, Math.min(6000, 600 + texto.length * 45));
+    f.depois();
   }
 
-  function diz(arquivo, texto, el) {
-    falaAtual = { arquivo, texto, el };
+  // sem som (mudo ou áudio indisponível), a boca mexe pelo tempo que a fala levaria
+  function mexeBoca(f, ms) {
+    calaBoca();
+    f.el.classList.add("falando");
+    bocaTimer = setTimeout(() => termina(f), ms);
+  }
+  const duracaoEstimada = (texto) => 600 + texto.length * 60;
+
+  // toca a fala e chama depois() quando ela acaba
+  function diz(arquivo, texto, el, depois) {
+    const f = { arquivo, texto, el, depois };
+    falaAtual = f;
     audio.pause();
     calaBoca();
-    if (!vozLigada) { mexeBoca(texto, el); return; }
+    if (!vozLigada) { mexeBoca(f, duracaoEstimada(texto)); return; }
     el.classList.add("falando");
     audio.src = arquivo;
-    audio.onended = () => { if (falaAtual && falaAtual.el === el) calaBoca(); };
-    audio.play().catch(() => { if (falaAtual && falaAtual.el === el) mexeBoca(texto, el); });
+    audio.onended = () => termina(f);
+    audio.play().catch(() => { if (falaAtual === f) mexeBoca(f, duracaoEstimada(texto)); });
   }
 
   function cala() {
@@ -147,13 +158,18 @@
     vozLigada = !vozLigada;
     try { localStorage.setItem("seringa-voz", vozLigada ? "ligada" : "desligada"); } catch (e) { /* sem armazenamento */ }
     atualizaBotaoVoz();
-    const atual = falaAtual;
-    if (!vozLigada) { audio.pause(); calaBoca(); }
-    else if (atual) diz(atual.arquivo, atual.texto, atual.el);
+    const f = falaAtual;
+    if (!f) return;
+    if (!vozLigada) {
+      // a história continua no mesmo ritmo, só sem som
+      const resto = audio.duration ? (audio.duration - audio.currentTime) * 1000 : duracaoEstimada(f.texto);
+      audio.pause();
+      mexeBoca(f, resto);
+    } else diz(f.arquivo, f.texto, f.el, f.depois);
   });
 
   // ---------- Roteiro ----------
-  let passo = -1, andando = false, timer = 0, vigia = 0;
+  let passo = -1, timer = 0, espera = 0, vigia = 0;
   const xJoao = () => Number(joao.style.getPropertyValue("--x"));
 
   function fala(p) {
@@ -170,52 +186,46 @@
     quem.classList.remove("pulo");
     void quem.offsetWidth; // reinicia o pulinho de quem fala
     quem.classList.add("pulo");
-    diz(p.audio, p.texto, quem);
+    diz(p.audio, p.texto, quem, () => { if (!p.fim) proxima(); });
+  }
+
+  function proxima() {
+    clearTimeout(espera);
+    espera = setTimeout(() => mostra(passo + 1), PAUSA);
   }
 
   function anda(x, depois) {
-    andando = true;
     balao.classList.remove("visivel");
     joao.classList.add("andando");
     joao.style.setProperty("--x", x);
     clearTimeout(timer);
-    timer = setTimeout(() => { andando = false; joao.classList.remove("andando"); depois(); }, semMovimento.matches ? 0 : ANDAR);
+    timer = setTimeout(() => { joao.classList.remove("andando"); depois(); }, semMovimento.matches ? 0 : ANDAR);
   }
 
   function mostra(i) {
     passo = i;
     const p = PASSOS[i];
-    clearInterval(vigia);
+    clearInterval(vigia); clearTimeout(espera);
     cala();
     if (p.seringa) {
       app.classList.remove("modo-historia");
       app.classList.add("modo-guiado");
       guiaTexto.textContent = p.texto;
-      btnContinuar.hidden = true;
       window.Seringa.encher();
-      diz(p.audio, p.texto, guiaAvatar);
-      vigia = setInterval(() => {
-        if (window.Seringa.extrudado() > MASSINHA_MINIMA) { btnContinuar.hidden = false; clearInterval(vigia); }
-      }, 200);
+      // depois da fala, espera alguém apertar a seringa até a massinha sair
+      diz(p.audio, p.texto, guiaAvatar, () => {
+        vigia = setInterval(() => {
+          if (window.Seringa.extrudado() > MASSINHA_MINIMA) { clearInterval(vigia); proxima(); }
+        }, 200);
+      });
       return;
     }
     app.classList.add("modo-historia");
     app.classList.remove("modo-guiado");
-    btnProximo.hidden = btnPular.hidden = !!p.fim;
+    btnPular.hidden = !!p.fim;
     btnRever.hidden = btnUsar.hidden = !p.fim;
     if (xJoao() !== p.joao) anda(p.joao, () => fala(p));
     else fala(p);
-  }
-
-  function avanca() {
-    if (historia.classList.contains("inicio")) { comeca(); return; }
-    if (andando || passo < 0 || passo >= PASSOS.length - 1) return;
-    if (PASSOS[passo].seringa && btnContinuar.hidden) return;
-    mostra(passo + 1);
-  }
-  function volta() {
-    if (andando || passo <= 0) return;
-    mostra(passo - 1);
   }
 
   function colocaJoao(x) {
@@ -227,25 +237,25 @@
 
   // tela de abertura: o clique em "Começar" também libera a voz no navegador
   function abertura() {
-    clearTimeout(timer); andando = false; passo = -1;
+    clearTimeout(timer); clearTimeout(espera); passo = -1;
     cala();
     colocaJoao(INICIO);
     balao.classList.remove("visivel");
     historia.classList.add("inicio");
     app.classList.add("modo-historia");
     app.classList.remove("modo-guiado");
-    btnProximo.hidden = btnRever.hidden = btnUsar.hidden = true;
+    btnRever.hidden = btnUsar.hidden = true;
     btnPular.hidden = false;
   }
   function comeca() {
-    clearTimeout(timer); andando = false;
+    clearTimeout(timer); clearTimeout(espera); clearInterval(vigia);
     historia.classList.remove("inicio");
     colocaJoao(ENTRADA);
     mostra(0);
   }
   function sai() {
-    clearTimeout(timer); clearInterval(vigia);
-    andando = false; passo = -1;
+    clearTimeout(timer); clearTimeout(espera); clearInterval(vigia);
+    passo = -1;
     cala();
     joao.classList.remove("andando");
     balao.classList.remove("visivel");
@@ -253,20 +263,10 @@
     app.classList.remove("modo-historia", "modo-guiado");
   }
 
-  historia.addEventListener("click", (e) => { if (!e.target.closest("button")) avanca(); });
   document.getElementById("comecar").addEventListener("click", comeca);
-  btnProximo.addEventListener("click", avanca);
-  btnContinuar.addEventListener("click", avanca);
   btnPular.addEventListener("click", sai);
   btnUsar.addEventListener("click", sai);
   btnRever.addEventListener("click", comeca);
-
-  document.addEventListener("keydown", (e) => {
-    if (!app.classList.contains("modo-historia") && !app.classList.contains("modo-guiado")) return;
-    if (e.target.closest && e.target.closest("button, input, textarea")) return;
-    if (e.key === "Enter" || e.key === "ArrowRight") { e.preventDefault(); avanca(); }
-    else if (e.key === "ArrowLeft") { e.preventDefault(); volta(); }
-  });
 
   abertura();
 })();
