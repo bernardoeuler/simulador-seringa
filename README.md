@@ -11,7 +11,7 @@ Ao abrir a página, começa uma historinha que apresenta a extrusão. O João, e
 - O botão do alto-falante, no canto de baixo à esquerda, liga e desliga a voz. A escolha fica salva no navegador.
 - Clique na cena, em **Próximo**, ou aperte Enter ou → para avançar. A tecla ← volta.
 - Na parte da seringa, aperte até a massinha sair para aparecer o **Continuar**.
-- **Pular história** vai direto para o simulador. **Ver história** recomeça do início.
+- **Pular história** vai direto para o simulador. Para ver a história de novo, recarregue a página.
 
 ## Como usar
 
@@ -20,7 +20,6 @@ Abra o `index.html` no navegador (não precisa instalar nada).
 - **Segure para apertar** (ou segure a barra de espaço): o êmbolo desce e a massinha sai.
 - **Bico da seringa**: estrela, círculo, coração, quadrado, triângulo, fita ou cruz (teclas 1 a 7).
 - **Cor da massinha**: seis cores.
-- **Apertar tudo**: esvazia a seringa sozinha.
 - **Encher de novo** (tecla R): recomeça.
 - **Tela cheia**: para mostrar no projetor.
 

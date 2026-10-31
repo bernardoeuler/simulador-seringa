@@ -118,7 +118,7 @@
   // ---------- Estado ----------
   const estado = {
     bico: BICOS[0], cor: CORES[0].hex,
-    hx: HX0, apertando: false, auto: false,
+    hx: HX0, apertando: false,
     t: 0,
   };
   const extrudado = () => (estado.hx - HX0) * K;
@@ -196,7 +196,7 @@
     ctx.lineWidth = 2.5; ctx.strokeStyle = tom(cor, 0.5); ctx.stroke();
   }
 
-  function desenhaSeringa(now) {
+  function desenhaSeringa() {
     const hx = estado.hx, cor = estado.cor, bico = estado.bico;
     const vazia = estado.hx >= HX1 - 0.5;
     const meia = Math.max(Math.abs(bico.vmin), Math.abs(bico.vmax)) * R;
@@ -241,22 +241,6 @@
     // apoio do polegar
     ctx.fillStyle = tema.metal; ctx.strokeStyle = tema["glass-line"];
     retArred(px - 12, CY - 86, 22, 172, 8); ctx.fill(); ctx.stroke();
-
-    // seta "Aperte!"
-    const ext = extrudado();
-    if (!vazia) {
-      const bob = estado.apertando || estado.auto ? 0 : Math.sin(now / 160) * 8;
-      const ax = px - 26 + bob;
-      if (ax > 60) {
-        ctx.fillStyle = "#ff9b24";
-        ctx.fillRect(ax - 110, CY - 15, 72, 30);
-        ctx.beginPath(); ctx.moveTo(ax - 40, CY - 38); ctx.lineTo(ax, CY); ctx.lineTo(ax - 40, CY + 38); ctx.closePath(); ctx.fill();
-        if (ext < 1) {
-          ctx.font = `800 34px ${tema.fonte}`; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-          ctx.fillStyle = "#e07400"; ctx.fillText("Aperte!", ax - 62, CY - 56);
-        }
-      }
-    }
   }
 
   function desenhaDetalhe(ext) {
@@ -305,41 +289,25 @@
     ctx.fillStyle = sg2; ctx.beginPath(); ctx.arc(0, 0, 340, 0, Math.PI * 2); ctx.fill(); ctx.restore();
   }
 
-  function desenhaLegenda(ext) {
-    const vazia = estado.hx >= HX1 - 0.5;
-    let txt = "Segure o botão (ou a barra de espaço) para apertar";
-    if (vazia) txt = "A seringa esvaziou! Clique em “Encher de novo”";
-    else if (ext > 4) txt = `A massinha sai com o formato do bico: ${estado.bico.nome.toLowerCase()}`;
-    ctx.font = `800 32px ${tema.fonte}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    const w = ctx.measureText(txt).width + 60;
-    ctx.fillStyle = tema.card; retArred(LW / 2 - w / 2, 722, w, 58, 29); ctx.fill();
-    ctx.fillStyle = tema.ink; ctx.fillText(txt, LW / 2, 752); ctx.textBaseline = "alphabetic";
-  }
-
   // ---------- Laço de animação ----------
   let antes = performance.now();
   const VEL = 95; // px lógicos por segundo do êmbolo
   function quadro(now) {
     const dt = Math.min(0.05, (now - antes) / 1000); antes = now;
-    if ((estado.apertando || estado.auto) && estado.hx < HX1) {
+    if (estado.apertando && estado.hx < HX1) {
       estado.hx = Math.min(HX1, estado.hx + VEL * dt);
-      if (estado.hx >= HX1) { estado.auto = false; avisa("A seringa esvaziou. Clique em “Encher de novo” para recomeçar."); }
     }
     leTema(now);
     ctx.setTransform(escala, 0, 0, escala, 0, 0);
     desenhaFundo();
     const ext = extrudado();
     desenhaMassinhaFora(ext);
-    desenhaSeringa(now);
+    desenhaSeringa();
     desenhaDetalhe(ext);
-    desenhaLegenda(ext);
     requestAnimationFrame(quadro);
   }
 
   // ---------- Controles ----------
-  const status = document.getElementById("status");
-  function avisa(msg) { status.textContent = msg; }
-
   const boxBicos = document.getElementById("bicos");
   BICOS.forEach((b, i) => {
     const btn = document.createElement("button");
@@ -353,7 +321,6 @@
   function escolheBico(i) {
     estado.bico = BICOS[i];
     boxBicos.querySelectorAll(".chip").forEach((c, j) => c.setAttribute("aria-pressed", j === i ? "true" : "false"));
-    avisa(`Bico trocado para ${BICOS[i].nome.toLowerCase()}.`);
   }
 
   const boxCores = document.getElementById("cores");
@@ -370,7 +337,7 @@
   });
 
   const btnApertar = document.getElementById("apertar");
-  function comeca(e) { if (e) e.preventDefault(); estado.apertando = true; btnApertar.classList.add("ativo"); if (estado.hx < HX1) avisa(""); }
+  function comeca(e) { if (e) e.preventDefault(); estado.apertando = true; btnApertar.classList.add("ativo"); }
   function para() { estado.apertando = false; btnApertar.classList.remove("ativo"); }
   btnApertar.addEventListener("pointerdown", (e) => { btnApertar.setPointerCapture?.(e.pointerId); comeca(e); });
   btnApertar.addEventListener("pointerup", para);
@@ -383,18 +350,15 @@
   cv.addEventListener("pointerup", para);
   cv.addEventListener("pointercancel", para);
 
-  document.getElementById("tudo").addEventListener("click", () => { if (estado.hx < HX1) { estado.auto = true; avisa(""); } });
   function encher() {
-    estado.hx = HX0; estado.auto = false; estado.apertando = false;
-    avisa("Seringa cheia de novo.");
+    estado.hx = HX0; estado.apertando = false;
   }
   document.getElementById("encher").addEventListener("click", encher);
 
   const app = document.getElementById("app");
   document.getElementById("tela").addEventListener("click", () => {
     if (document.fullscreenElement) document.exitFullscreen?.();
-    else if (app.requestFullscreen) app.requestFullscreen().catch(() => avisa("A tela cheia não está disponível aqui. Use F11 no navegador."));
-    else avisa("A tela cheia não está disponível aqui. Use F11 no navegador.");
+    else app.requestFullscreen?.().catch(() => {});
   });
 
   document.addEventListener("keydown", (e) => {
