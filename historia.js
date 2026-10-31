@@ -16,7 +16,6 @@
   ];
   const MARIA = 74, ENTRADA = -12, INICIO = 22, ANDAR = 1800;
   const PAUSA = 1000; // intervalo entre uma fala e a próxima
-  const MASSINHA_MINIMA = 60; // quanto a massinha precisa sair para a história seguir
 
   // ---------- Desenho dos personagens (viewBox 100 x 200) ----------
   const AZUL_UFC = "#0b4f9c";
@@ -92,6 +91,8 @@
   const balaoNome = document.getElementById("balao-nome"), balaoTexto = document.getElementById("balao-texto");
   const btnPular = document.getElementById("pular");
   const btnRever = document.getElementById("rever"), btnUsar = document.getElementById("usar");
+  // as duas únicas ações pedidas durante a história: entrar no simulador e voltar dele
+  const btnIrSimulador = document.getElementById("ir-simulador"), btnVoltar = document.getElementById("voltar-historia");
   const guiaTexto = document.getElementById("guia-texto");
   const guiaAvatar = document.getElementById("guia-avatar");
   const btnVoz = document.getElementById("voz");
@@ -228,7 +229,7 @@
   });
 
   // ---------- Roteiro ----------
-  let passo = -1, timer = 0, espera = 0, vigia = 0;
+  let passo = -1, timer = 0, espera = 0;
   const xJoao = () => Number(joao.style.getPropertyValue("--x"));
 
   function fala(p) {
@@ -245,7 +246,12 @@
     quem.classList.remove("pulo");
     void quem.offsetWidth; // reinicia o pulinho de quem fala
     quem.classList.add("pulo");
-    diz(p.audio, p.texto, quem, () => { if (!p.fim) proxima(); });
+    diz(p.audio, p.texto, quem, () => {
+      if (p.fim) return;
+      // antes do simulador a história para e espera o clique em "Ir para o simulador"
+      if (PASSOS[passo + 1].seringa) btnIrSimulador.hidden = false;
+      else proxima();
+    });
   }
 
   function proxima() {
@@ -264,19 +270,16 @@
   function mostra(i) {
     passo = i;
     const p = PASSOS[i];
-    clearInterval(vigia); clearTimeout(espera);
+    clearTimeout(espera);
     cala();
+    btnIrSimulador.hidden = true;
     if (p.seringa) {
+      // no simulador quem controla é o usuário: nada avança sozinho até "Continuar a história"
       app.classList.remove("modo-historia");
       app.classList.add("modo-guiado");
       guiaTexto.textContent = p.texto;
       window.Seringa.encher();
-      // depois da fala, espera alguém apertar a seringa até a massinha sair
-      diz(p.audio, p.texto, guiaAvatar, () => {
-        vigia = setInterval(() => {
-          if (window.Seringa.extrudado() > MASSINHA_MINIMA) { clearInterval(vigia); proxima(); }
-        }, 200);
-      });
+      diz(p.audio, p.texto, guiaAvatar, () => {});
       return;
     }
     app.classList.add("modo-historia");
@@ -297,6 +300,7 @@
   // tela inicial: o clique em "COMEÇAR" também libera as falas no navegador
   function abertura() {
     clearTimeout(timer); clearTimeout(espera); passo = -1;
+    btnIrSimulador.hidden = true;
     cala();
     colocaJoao(INICIO);
     balao.classList.remove("visivel");
@@ -308,15 +312,16 @@
     tocaMusica();
   }
   function comeca() {
-    clearTimeout(timer); clearTimeout(espera); clearInterval(vigia);
+    clearTimeout(timer); clearTimeout(espera);
     paraMusica();
     historia.classList.remove("inicio");
     colocaJoao(ENTRADA);
     mostra(0);
   }
   function sai() {
-    clearTimeout(timer); clearTimeout(espera); clearInterval(vigia);
+    clearTimeout(timer); clearTimeout(espera);
     passo = -1;
+    btnIrSimulador.hidden = true;
     cala();
     paraMusica();
     joao.classList.remove("andando");
@@ -329,6 +334,8 @@
   btnPular.addEventListener("click", sai);
   btnUsar.addEventListener("click", sai);
   btnRever.addEventListener("click", comeca);
+  btnIrSimulador.addEventListener("click", () => mostra(passo + 1));
+  btnVoltar.addEventListener("click", () => mostra(passo + 1));
 
   abertura();
 })();
