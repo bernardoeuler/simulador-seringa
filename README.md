@@ -7,7 +7,7 @@ Simulador interativo para apresentação em sala de aula: uma seringa cheia de m
 Ao abrir a página, começa uma historinha que apresenta a extrusão. O João, estudante de Engenharia de Produção da UFC, campus Russas, tem dúvida sobre o processo. A Maria explica com a seringa de massinha e depois liga cada parte ao processo industrial: o êmbolo é o pistão, a massinha é o material e o bico é a matriz.
 
 - A história abre com o botão **Começar história**. O clique é necessário porque o navegador só deixa a voz tocar depois de uma interação.
-- Os dois usam a camisa branca da UFC e falam o texto dos balões com a voz do navegador em português (no Windows, "Microsoft Daniel" para o João e "Microsoft Maria" para a Maria, sem precisar de internet).
+- Os dois usam a camisa branca da UFC, e cada fala toca um áudio gravado, que fica na pasta `audio/` (numerado na ordem da história).
 - O botão do alto-falante, no canto de baixo à esquerda, liga e desliga a voz. A escolha fica salva no navegador.
 - Clique na cena, em **Próximo**, ou aperte Enter ou → para avançar. A tecla ← volta.
 - Na parte da seringa, aperte até a massinha sair para aparecer o **Continuar**.
@@ -33,5 +33,6 @@ Trocar o bico ou a cor muda o formato e a cor de toda a massinha.
 - `script.js`: desenho da cena no `<canvas>` e animação
 - `historia.js`: roteiro e animação da historinha
 - `favicon.svg`: ícone da aba
+- `audio/`: falas gravadas do João e da Maria
 
 Sem internet, tudo funciona; só a fonte dos textos troca por uma do sistema.

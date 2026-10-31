@@ -1,18 +1,18 @@
 // Historinha da extrusão: o João tem dúvida e a Maria explica com a seringa de massinha.
-// As posições (--x) são em % da largura do palco. As falas usam a voz do navegador (pt-BR).
+// As posições (--x) são em % da largura do palco. Cada fala tem um áudio gravado em audio/.
 
 (function () {
   "use strict";
 
   const PASSOS = [
-    { quem: "joao", joao: 22, texto: "Oi, me chamo João, sou estudante de Engenharia de Produção na UFC, campus Russas, estou fazendo a cadeira de Tópicos de Fabricação e estou com dúvida no processo de extrusão." },
-    { quem: "maria", joao: 50, texto: "Posso te explicar esse processo de forma fácil e prática!" },
-    { quem: "maria", joao: 50, texto: "Com uma seringa e uma massinha de modelar, dá para ver como a extrusão funciona." },
-    { seringa: true, texto: "Aperte a seringa e veja: a massinha sai com o formato do bico." },
-    { quem: "maria", joao: 50, texto: "Na extrusão, o material é empurrado através de uma abertura chamada matriz e sai com o formato dela." },
-    { quem: "maria", joao: 50, texto: "O êmbolo é o pistão que faz a força, a massinha é o material (como alumínio ou plástico) e o bico é a matriz." },
-    { quem: "maria", joao: 50, texto: "É assim que se fabricam tubos de PVC, perfis de alumínio de janelas e até macarrão!" },
-    { quem: "joao", joao: 50, texto: "Agora entendi! Obrigado, Maria!", fim: true },
+    { quem: "joao", joao: 22, audio: "audio/1-joao-apresentacao.mp3", texto: "Oi, me chamo João, sou estudante de Engenharia de Produção na UFC, campus Russas, estou fazendo a cadeira de Tópicos de Fabricação e estou com dúvida no processo de extrusão." },
+    { quem: "maria", joao: 50, audio: "audio/2-maria-posso-explicar.mp3", texto: "Posso te explicar esse processo de forma fácil e prática!" },
+    { quem: "maria", joao: 50, audio: "audio/3-maria-seringa-e-massinha.mp3", texto: "Com uma seringa e uma massinha de modelar, dá para ver como a extrusão funciona." },
+    { seringa: true, audio: "audio/4-maria-aperte-a-seringa.mp3", texto: "Aperte a seringa e veja: a massinha sai com o formato do bico." },
+    { quem: "maria", joao: 50, audio: "audio/5-maria-matriz.mp3", texto: "Na extrusão, o material é empurrado através de uma abertura chamada matriz e sai com o formato dela." },
+    { quem: "maria", joao: 50, audio: "audio/6-maria-embolo-pistao.mp3", texto: "O êmbolo é o pistão que faz a força, a massinha é o material (como alumínio ou plástico) e o bico é a matriz." },
+    { quem: "maria", joao: 50, audio: "audio/7-maria-exemplos.mp3", texto: "É assim que se fabricam tubos de PVC, perfis de alumínio de janelas e até macarrão!" },
+    { quem: "joao", joao: 50, audio: "audio/8-joao-agora-entendi.mp3", texto: "Agora entendi! Obrigado, Maria!", fim: true },
   ];
   const MARIA = 74, ENTRADA = -12, INICIO = 22, ANDAR = 1800;
   const MASSINHA_MINIMA = 60; // quanto a massinha precisa sair para liberar o "Continuar"
@@ -100,67 +100,39 @@
   maria.innerHTML = desenho("maria");
   guiaAvatar.innerHTML = desenho("maria");
 
-  // ---------- Voz ----------
-  const temVoz = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+  // ---------- Voz (falas gravadas em audio/) ----------
+  const audio = new Audio();
+  audio.preload = "auto";
   let vozLigada = true;
   try { vozLigada = localStorage.getItem("seringa-voz") !== "desligada"; } catch (e) { /* sem armazenamento */ }
-  const vozes = { joao: null, maria: null };
   let bocaTimer = 0, falaAtual = null;
-
-  function escolheVozes() {
-    const pt = speechSynthesis.getVoices().filter((v) => /^pt[-_]BR/i.test(v.lang));
-    const ordena = (l) => l.sort((a, b) => Number(b.localService) - Number(a.localService));
-    const acha = (re) => ordena(pt.filter((v) => re.test(v.name)))[0] || null;
-    const qualquer = ordena(pt.slice())[0] || null;
-    vozes.maria = acha(/maria|francisca|luciana|vit[oó]ria|thalita|female|feminin/i) || qualquer;
-    vozes.joao = acha(/daniel|ant[oô]nio|f[aá]bio|donato|\bmale\b|masculin/i) || qualquer;
-  }
-  if (temVoz) {
-    escolheVozes();
-    speechSynthesis.addEventListener?.("voiceschanged", escolheVozes);
-  }
-
-  // frases longas em pedaços, para o navegador não cortar a fala no meio
-  function pedacos(texto) {
-    const out = [];
-    texto.split(/(?<=[,.!?:])\s+/).forEach((p) => {
-      const ult = out[out.length - 1];
-      if (ult && ult.length + p.length < 110) out[out.length - 1] = ult + " " + p;
-      else out.push(p);
-    });
-    return out;
-  }
 
   function calaBoca() {
     clearTimeout(bocaTimer);
     [joao, maria, guiaAvatar].forEach((el) => el.classList.remove("falando"));
   }
 
-  function diz(quem, texto, el) {
-    falaAtual = { quem, texto, el };
-    if (temVoz) speechSynthesis.cancel();
+  // sem som (mudo ou áudio indisponível), a boca mexe por um tempo proporcional ao texto
+  function mexeBoca(texto, el) {
     calaBoca();
     el.classList.add("falando");
-    if (!temVoz || !vozLigada) {
-      bocaTimer = setTimeout(calaBoca, Math.min(6000, 600 + texto.length * 45));
-      return;
-    }
-    const partes = pedacos(texto);
-    const mesmaVoz = vozes.joao === vozes.maria;
-    partes.forEach((t, i) => {
-      const u = new SpeechSynthesisUtterance(t);
-      u.lang = "pt-BR";
-      if (vozes[quem]) u.voice = vozes[quem];
-      u.pitch = mesmaVoz ? (quem === "joao" ? 0.85 : 1.2) : 1;
-      u.rate = 1;
-      if (i === partes.length - 1) u.onend = u.onerror = () => { if (falaAtual && falaAtual.el === el) calaBoca(); };
-      speechSynthesis.speak(u);
-    });
+    bocaTimer = setTimeout(calaBoca, Math.min(6000, 600 + texto.length * 45));
+  }
+
+  function diz(arquivo, texto, el) {
+    falaAtual = { arquivo, texto, el };
+    audio.pause();
+    calaBoca();
+    if (!vozLigada) { mexeBoca(texto, el); return; }
+    el.classList.add("falando");
+    audio.src = arquivo;
+    audio.onended = () => { if (falaAtual && falaAtual.el === el) calaBoca(); };
+    audio.play().catch(() => { if (falaAtual && falaAtual.el === el) mexeBoca(texto, el); });
   }
 
   function cala() {
     falaAtual = null;
-    if (temVoz) speechSynthesis.cancel();
+    audio.pause();
     calaBoca();
   }
 
@@ -170,15 +142,14 @@
     btnVoz.setAttribute("aria-label", rotulo);
     btnVoz.title = rotulo;
   }
-  btnVoz.hidden = !temVoz;
   atualizaBotaoVoz();
   btnVoz.addEventListener("click", () => {
     vozLigada = !vozLigada;
     try { localStorage.setItem("seringa-voz", vozLigada ? "ligada" : "desligada"); } catch (e) { /* sem armazenamento */ }
     atualizaBotaoVoz();
     const atual = falaAtual;
-    if (!vozLigada) { if (temVoz) speechSynthesis.cancel(); calaBoca(); }
-    else if (atual) diz(atual.quem, atual.texto, atual.el);
+    if (!vozLigada) { audio.pause(); calaBoca(); }
+    else if (atual) diz(atual.arquivo, atual.texto, atual.el);
   });
 
   // ---------- Roteiro ----------
@@ -199,7 +170,7 @@
     quem.classList.remove("pulo");
     void quem.offsetWidth; // reinicia o pulinho de quem fala
     quem.classList.add("pulo");
-    diz(p.quem, p.texto, quem);
+    diz(p.audio, p.texto, quem);
   }
 
   function anda(x, depois) {
@@ -222,7 +193,7 @@
       guiaTexto.textContent = p.texto;
       btnContinuar.hidden = true;
       window.Seringa.encher();
-      diz("maria", p.texto, guiaAvatar);
+      diz(p.audio, p.texto, guiaAvatar);
       vigia = setInterval(() => {
         if (window.Seringa.extrudado() > MASSINHA_MINIMA) { btnContinuar.hidden = false; clearInterval(vigia); }
       }, 200);
