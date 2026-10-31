@@ -399,12 +399,16 @@
 
   document.addEventListener("keydown", (e) => {
     if (e.target.closest && e.target.closest("input, textarea")) return;
+    if (app.classList.contains("modo-historia")) return; // a seringa fica escondida durante a história
     if (e.code === "Space") { e.preventDefault(); if (!e.repeat) comeca(); }
     else if (e.key === "r" || e.key === "R") encher();
     else if (/^[1-7]$/.test(e.key)) escolheBico(Number(e.key) - 1);
   });
   document.addEventListener("keyup", (e) => { if (e.code === "Space") para(); });
   window.addEventListener("blur", para);
+
+  // usado pela historinha (historia.js)
+  window.Seringa = { extrudado, encher };
 
   requestAnimationFrame(quadro);
 })();
