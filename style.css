@@ -159,7 +159,7 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
   aspect-ratio: 2 / 1; min-height: 460px;
   container-type: inline-size;
   background: linear-gradient(var(--scene-top), var(--scene-bot));
-  overflow: hidden; cursor: pointer;
+  overflow: hidden;
   user-select: none; -webkit-user-select: none;
 }
 .h-chao {
@@ -234,7 +234,6 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
   box-shadow: 0 6px 18px rgba(20, 30, 60, 0.15); text-align: center; cursor: default;
 }
 .historia.inicio .h-inicio { display: flex; }
-.historia.inicio #proximo { display: none; }
 .h-inicio-titulo { margin: 0; font: 700 clamp(24px, 3.2cqw, 36px)/1.1 var(--font-display); color: var(--fg); }
 .h-inicio-sub { margin: 0 0 10px; color: var(--muted); font-weight: 700; }
 
@@ -262,7 +261,6 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 .guia-avatar svg { width: 100%; height: 100%; }
 .guia-texto { margin: 0; flex: 1; font-weight: 700; }
 .guia-texto strong { color: var(--accent); }
-.guia button[hidden] { display: none; }
 
 .app:fullscreen .historia { width: 100%; height: 100%; aspect-ratio: auto; min-height: 0; border-radius: 14px; }
 .app:fullscreen .guia { flex: none; }

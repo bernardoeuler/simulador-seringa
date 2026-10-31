@@ -9,8 +9,8 @@ Ao abrir a página, começa uma historinha que apresenta a extrusão. O João, e
 - A história abre com o botão **Começar história**. O clique é necessário porque o navegador só deixa a voz tocar depois de uma interação.
 - Os dois usam a camisa branca da UFC, e cada fala toca um áudio gravado, que fica na pasta `audio/` (numerado na ordem da história).
 - O botão do alto-falante, no canto de baixo à esquerda, liga e desliga a voz. A escolha fica salva no navegador.
-- Clique na cena, em **Próximo**, ou aperte Enter ou → para avançar. A tecla ← volta.
-- Na parte da seringa, aperte até a massinha sair para aparecer o **Continuar**.
+- Depois do **Começar**, a história segue sozinha: cada fala começa 1 s depois que a anterior termina.
+- Na parte da seringa, a história espera alguém apertar até a massinha sair e segue 1 s depois.
 - **Pular história** vai direto para o simulador. Para ver a história de novo, recarregue a página.
 
 ## Como usar
