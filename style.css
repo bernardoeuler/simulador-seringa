@@ -188,7 +188,16 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 .boneco.andando .braco { animation: balanco 0.45s ease-in-out infinite alternate-reverse; }
 .boneco.andando .braco.outra { animation-direction: alternate; }
 .boneco.andando svg { animation: pulinho 0.225s ease-in-out infinite alternate; }
-.boneco.falando svg { animation: fala 0.6s ease-in-out 2 alternate; }
+.boneco.pulo svg { animation: fala 0.6s ease-in-out 2 alternate; }
+/* rosto: piscar e boca mexendo enquanto fala */
+.palpebra { transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); animation: pisca 4.2s infinite; }
+#maria .palpebra { animation-delay: 1.3s; }
+.boca-aberta { opacity: 0; }
+.falando .boca-aberta { animation: boca-abre 0.32s steps(1) infinite; }
+.falando .boca-fechada { animation: boca-fecha 0.32s steps(1) infinite; }
+@keyframes pisca { 0%, 94%, 100% { transform: scaleY(0); } 97% { transform: scaleY(1); } }
+@keyframes boca-abre { 0% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes boca-fecha { 0% { opacity: 0; } 50% { opacity: 1; } }
 @keyframes passo { from { transform: rotate(-16deg); } to { transform: rotate(16deg); } }
 @keyframes balanco { from { transform: rotate(-12deg); } to { transform: rotate(12deg); } }
 @keyframes pulinho { to { transform: translateY(-2%); } }
@@ -223,12 +232,40 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 .h-nav button.btn { padding: 8px 14px; font-size: 15px; }
 .h-nav button[hidden] { display: none; }
 
+/* tela de abertura */
+.h-inicio {
+  position: absolute; left: 50%; top: 10%; transform: translateX(-50%);
+  display: none; flex-direction: column; align-items: center; gap: 6px;
+  width: min(90%, 460px); padding: 20px 24px;
+  background: var(--card); border: 3px solid var(--glass-line); border-radius: 22px;
+  box-shadow: 0 6px 18px rgba(20, 30, 60, 0.15); text-align: center; cursor: default;
+}
+.historia.inicio .h-inicio { display: flex; }
+.historia.inicio #proximo { display: none; }
+.h-inicio-titulo { margin: 0; font: 700 clamp(24px, 3.2cqw, 36px)/1.1 var(--font-display); color: var(--fg); }
+.h-inicio-sub { margin: 0 0 10px; color: var(--muted); font-weight: 700; }
+
+/* botão de voz: discreto, no canto de baixo à esquerda do palco */
+.voz {
+  position: absolute; left: 12px; bottom: 12px; z-index: 2;
+  width: 40px; height: 40px; padding: 8px; border-radius: 50%;
+  display: none; place-items: center;
+  border: 1px solid var(--line); background: var(--card); color: var(--muted);
+  opacity: 0.85; cursor: pointer;
+}
+.voz:hover { opacity: 1; color: var(--fg); }
+.modo-historia .voz, .modo-guiado .voz { display: grid; }
+.voz[hidden] { display: none !important; }
+.voz svg { width: 100%; height: 100%; }
+.voz .voz-off, .voz[aria-pressed="false"] .voz-on { display: none; }
+.voz[aria-pressed="false"] .voz-off { display: inline; }
+
 .guia {
   align-items: center; gap: 14px;
   padding: 10px 14px; border-radius: 14px;
   background: var(--card); border: 2px solid var(--accent);
 }
-.guia-avatar { flex: none; width: 34px; height: 68px; }
+.guia-avatar { flex: none; width: 44px; height: 88px; }
 .guia-avatar svg { width: 100%; height: 100%; }
 .guia-texto { margin: 0; flex: 1; font-weight: 700; }
 .guia-texto strong { color: var(--accent); }
@@ -244,6 +281,6 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   button.primary.ativo { transform: none; }
   .boneco { transition: none; }
-  .boneco svg, .boneco .perna, .boneco .braco { animation: none !important; }
+  .boneco svg, .boneco .perna, .boneco .braco, .palpebra, .boca-aberta, .boca-fechada { animation: none !important; }
   .balao { transition: none; }
 }
