@@ -24,38 +24,16 @@
 
       <div class="historia" id="historia">
         <div class="h-chao"></div>
-        <div class="boneco" id="joao" style="--x: -12">
-          <svg viewBox="0 0 100 200" preserveAspectRatio="xMidYMax meet" role="img" aria-label="João">
-            <g class="perna"><rect x="37" y="124" width="11" height="56" rx="5" fill="#2f3a56"/><ellipse cx="41" cy="183" rx="10" ry="5" fill="#1f2433"/></g>
-            <g class="perna outra"><rect x="52" y="124" width="11" height="56" rx="5" fill="#2f3a56"/><ellipse cx="59" cy="183" rx="10" ry="5" fill="#1f2433"/></g>
-            <g class="braco"><rect x="19" y="76" width="11" height="48" rx="5" fill="#3d8bff"/><circle cx="24.5" cy="126" r="6" fill="#e8b48a"/></g>
-            <g class="braco outra"><rect x="70" y="76" width="11" height="48" rx="5" fill="#3d8bff"/><circle cx="75.5" cy="126" r="6" fill="#e8b48a"/></g>
-            <rect x="29" y="70" width="42" height="62" rx="14" fill="#3d8bff"/>
-            <rect x="44" y="62" width="12" height="12" fill="#e8b48a"/>
-            <circle cx="50" cy="44" r="24" fill="#e8b48a"/>
-            <path d="M26 44 Q24 16 50 16 Q76 16 74 44 Q68 28 52 30 Q36 30 26 44 Z" fill="#3b2a20"/>
-            <circle cx="42" cy="47" r="3" fill="#26314f"/><circle cx="58" cy="47" r="3" fill="#26314f"/>
-            <path class="boca" d="M42 56 Q50 62 58 56" fill="none" stroke="#26314f" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="boneco" id="maria" style="--x: 74">
-          <svg viewBox="0 0 100 200" preserveAspectRatio="xMidYMax meet" role="img" aria-label="Maria">
-            <path d="M24 44 Q22 12 50 12 Q78 12 76 44 L80 94 Q66 100 62 88 L38 88 Q34 100 20 94 Z" fill="#5a3320"/>
-            <g class="perna"><rect x="37" y="124" width="11" height="56" rx="5" fill="#3a4a7a"/><ellipse cx="41" cy="183" rx="10" ry="5" fill="#1f2433"/></g>
-            <g class="perna outra"><rect x="52" y="124" width="11" height="56" rx="5" fill="#3a4a7a"/><ellipse cx="59" cy="183" rx="10" ry="5" fill="#1f2433"/></g>
-            <g class="braco"><rect x="19" y="76" width="11" height="48" rx="5" fill="#9b5de5"/><circle cx="24.5" cy="126" r="6" fill="#b9825a"/></g>
-            <g class="braco outra"><rect x="70" y="76" width="11" height="48" rx="5" fill="#9b5de5"/><circle cx="75.5" cy="126" r="6" fill="#b9825a"/></g>
-            <rect x="29" y="70" width="42" height="62" rx="14" fill="#9b5de5"/>
-            <rect x="44" y="62" width="12" height="12" fill="#b9825a"/>
-            <circle cx="50" cy="44" r="24" fill="#b9825a"/>
-            <path d="M26 42 Q28 16 50 16 Q72 16 74 42 Q62 26 48 28 Q36 30 26 42 Z" fill="#5a3320"/>
-            <circle cx="42" cy="47" r="3" fill="#26314f"/><circle cx="58" cy="47" r="3" fill="#26314f"/>
-            <path class="boca" d="M42 56 Q50 62 58 56" fill="none" stroke="#26314f" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-        </div>
+        <div class="boneco" id="joao" style="--x: 22" role="img" aria-label="João"></div>
+        <div class="boneco" id="maria" style="--x: 74" role="img" aria-label="Maria"></div>
         <div class="balao" id="balao" aria-live="polite">
           <strong class="balao-nome" id="balao-nome"></strong>
           <p class="balao-texto" id="balao-texto"></p>
+        </div>
+        <div class="h-inicio" id="inicio">
+          <p class="h-inicio-titulo">O que é extrusão?</p>
+          <p class="h-inicio-sub">Uma historinha com o João e a Maria</p>
+          <button class="btn primary" id="comecar" type="button">Começar história</button>
         </div>
         <div class="h-nav">
           <button class="btn" id="pular" type="button">Pular história</button>
@@ -64,6 +42,13 @@
           <button class="btn primary" id="usar" type="button" hidden>Usar o simulador</button>
         </div>
       </div>
+      <button class="voz" id="voz" type="button" aria-pressed="true" aria-label="Desligar voz" title="Desligar voz">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>
+          <g class="voz-on" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 9.5a3.5 3.5 0 0 1 0 5"/><path d="M18.5 7a7 7 0 0 1 0 10"/></g>
+          <g class="voz-off" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 9l5 6M21 9l-5 6"/></g>
+        </svg>
+      </button>
     </div>
 
     <div class="guia" id="guia">
@@ -89,7 +74,7 @@
         <button class="btn" id="ver-historia" type="button">Ver história</button>
       </div>
       <p class="status" id="status" aria-live="polite"></p>
-      <p class="keys">Atalhos: segure espaço para apertar · R enche de novo · 1 a 7 trocam o bico. Na história: clique, Enter ou → avançam e ← volta.</p>
+      <p class="keys">Atalhos: segure espaço para apertar · R enche de novo · 1 a 7 trocam o bico. Na história: clique, Enter ou → avançam, ← volta, e o botão do alto-falante liga e desliga a voz.</p>
     </div>
   </section>
 </main>
