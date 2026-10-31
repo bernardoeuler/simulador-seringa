@@ -55,15 +55,10 @@ body {
   gap: 20px;
 }
 header { display: grid; gap: 4px; }
-.eyebrow {
-  margin: 0; font-size: 13px; font-weight: 800; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--accent);
-}
 h1 {
   margin: 0; font-family: var(--font-display); font-weight: 700;
   font-size: clamp(32px, 5vw, 48px); line-height: 1.05; text-wrap: balance;
 }
-.lede { margin: 0; color: var(--muted); max-width: 62ch; }
 
 .app {
   display: grid; gap: 16px;
@@ -125,8 +120,6 @@ button.primary:hover { border-color: var(--fg); }
 button.primary.ativo { transform: translateY(2px); filter: brightness(0.92); }
 button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 
-.status { margin: 0; min-height: 1.5em; font-weight: 700; color: var(--accent); grid-column: 1 / -1; }
-.keys { margin: 0; font-size: 14px; color: var(--muted); grid-column: 1 / -1; }
 
 /* Tela cheia: palco ocupa a tela, controles numa faixa embaixo */
 .app:fullscreen {
@@ -146,7 +139,7 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
   flex: none; display: flex; flex-wrap: wrap; align-items: center;
   justify-content: center; gap: 10px 24px;
 }
-.app:fullscreen .group h2, .app:fullscreen .keys, .app:fullscreen .status { display: none; }
+.app:fullscreen .group h2 { display: none; }
 .app:fullscreen .chips { gap: 6px; }
 .app:fullscreen .chip { padding: 6px 10px 6px 6px; font-size: 14px; }
 .app:fullscreen .chip svg { width: 22px; height: 22px; }

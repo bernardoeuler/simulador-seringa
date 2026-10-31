@@ -260,7 +260,6 @@
   btnPular.addEventListener("click", sai);
   btnUsar.addEventListener("click", sai);
   btnRever.addEventListener("click", comeca);
-  document.getElementById("ver-historia").addEventListener("click", comeca);
 
   document.addEventListener("keydown", (e) => {
     if (!app.classList.contains("modo-historia") && !app.classList.contains("modo-guiado")) return;
