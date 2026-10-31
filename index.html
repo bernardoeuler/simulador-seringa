@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -12,15 +12,19 @@
 </head>
 <body>
 <main class="page">
-  <header>
-    <h1>Extrusão</h1>
-  </header>
+  <h1 class="so-leitor">Extrusão, Tópicos de Fabricação - UFC</h1>
 
   <section class="app modo-historia" id="app">
     <div class="stage">
       <canvas id="cena" role="img" aria-label="Seringa com massinha de modelar. Ao apertar, a massinha sai pelo bico no formato escolhido."></canvas>
 
       <div class="historia" id="historia">
+        <div class="h-sala" aria-hidden="true">
+          <div class="h-janela"></div>
+          <div class="h-quadro"><span>Extrusão</span></div>
+          <div class="h-relogio"></div>
+          <div class="h-mesa"></div>
+        </div>
         <div class="h-chao"></div>
         <div class="boneco" id="aluno" style="--x: 22" role="img" aria-label="Aluno"></div>
         <div class="boneco" id="professor" style="--x: 74" role="img" aria-label="Professor Pedro"></div>
@@ -36,11 +40,10 @@
           <p class="h-escolha-titulo">Escolha seu personagem</p>
           <div class="h-escolha-lista" id="lista-alunos"></div>
         </div>
-        <div class="h-nav">
-          <button class="btn" id="pular" type="button">Pular história</button>
-          <button class="btn primary" id="ir-simulador" type="button" hidden>Ir para o simulador</button>
-          <button class="btn" id="rever" type="button" hidden>Ver de novo</button>
-          <button class="btn primary" id="usar" type="button" hidden>Usar o simulador</button>
+        <div class="h-acao">
+          <button class="btn-grande" id="ir-simulador" type="button" hidden>Ir para o simulador</button>
+          <button class="btn-grande" id="usar" type="button" hidden>Usar o simulador</button>
+          <button class="btn-grande secundario" id="rever" type="button" hidden>Ver de novo</button>
         </div>
       </div>
       <button class="voz" id="voz" type="button" aria-pressed="true" aria-label="Desligar som" title="Desligar som">
