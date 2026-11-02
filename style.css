@@ -46,25 +46,31 @@ body {
   line-height: 1.5;
 }
 .page {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 28px 40px;
+  padding-block: 16px;
   display: grid;
-  gap: 20px;
+  gap: 12px;
 }
-header { display: grid; gap: 4px; }
-h1 {
-  margin: 0; font-family: var(--font-display); font-weight: 700;
-  font-size: clamp(32px, 5vw, 48px); line-height: 1.05; text-wrap: balance;
+.so-leitor {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
 }
 
+/* O palco acompanha a altura da tela, para ele e os controles caberem juntos sem rolar
+   (--reserva = espaço vertical do que fica fora do palco em cada modo) */
 .app {
-  display: grid; gap: 16px;
+  --reserva: 40px;
+  display: grid; gap: 12px;
   background: var(--bg);
 }
+.app:not(.modo-historia) { --reserva: 230px; }
+.app.modo-guiado { --reserva: 330px; }
 .stage {
+  width: min(100%, max(560px, calc((100svh - var(--reserva)) * 2)));
+  justify-self: center;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -74,8 +80,8 @@ h1 {
 
 .controls {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-  gap: 18px 28px;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 12px 28px;
   align-items: start;
 }
 .group { display: grid; gap: 10px; min-width: 0; }
@@ -130,7 +136,7 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 .app:fullscreen .stage {
-  flex: 1 1 0; min-height: 0;
+  flex: 1 1 0; min-height: 0; width: 100%;
   display: grid; place-items: center;
   border: 0; background: var(--bg);
 }
@@ -148,7 +154,7 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 .app:fullscreen button.primary { padding: 9px 22px; font-size: 17px; }
 
 /* Historinha: o aluno escolhido e o professor Pedro no lugar da cena enquanto a história roda */
-.stage { position: relative; }
+.stage { position: relative; container-type: inline-size; }
 .historia, .guia { display: none; }
 .modo-historia #cena, .modo-historia .controls { display: none; }
 .modo-historia .historia { display: block; }
@@ -162,6 +168,51 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
   overflow: hidden;
   user-select: none; -webkit-user-select: none;
 }
+/* sala de aula ao fundo: janela, quadro-verde, relógio e a mesa do professor */
+.h-sala { position: absolute; inset: 0; pointer-events: none; }
+.h-sala::after { /* rodapé da parede */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 13%; height: 2.2%;
+  background: color-mix(in srgb, var(--floor-bot) 70%, var(--scene-bot));
+}
+.h-janela {
+  position: absolute; left: 3%; top: 14%; width: 13%; height: 36%;
+  border: 0.7cqw solid color-mix(in srgb, var(--metal) 85%, #8a96ad); border-radius: 0.6cqw;
+  background:
+    linear-gradient(color-mix(in srgb, var(--metal) 85%, #8a96ad), color-mix(in srgb, var(--metal) 85%, #8a96ad)) center / 0.6cqw 100% no-repeat,
+    linear-gradient(color-mix(in srgb, var(--metal) 85%, #8a96ad), color-mix(in srgb, var(--metal) 85%, #8a96ad)) center / 100% 0.6cqw no-repeat,
+    linear-gradient(#9fd0ff, #d9efff 70%, #bfe3c4);
+}
+.h-quadro {
+  position: absolute; left: 30%; top: 12%; width: 40%; height: 38%;
+  display: grid; place-items: center;
+  background: #2f5d46; border: 0.9cqw solid #8a5a35; border-radius: 0.5cqw;
+  box-shadow: inset 0 0 3cqw rgba(0, 0, 0, 0.25);
+}
+.h-quadro span {
+  font: 700 4.4cqw/1 var(--font-display); color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.04em; transform: rotate(-2deg);
+}
+.h-quadro::after { /* apoio do giz */
+  content: ""; position: absolute; left: -0.9cqw; right: -0.9cqw; bottom: -1.8cqw; height: 0.9cqw;
+  background: #7a4e2e; border-radius: 0.3cqw;
+}
+.h-relogio {
+  position: absolute; right: 6%; top: 12%; width: 5.5cqw; aspect-ratio: 1;
+  border-radius: 50%; background: #fff; border: 0.6cqw solid #3b4258;
+  background-image:
+    linear-gradient(#3b4258, #3b4258), linear-gradient(#3b4258, #3b4258);
+  background-size: 0.35cqw 38%, 30% 0.35cqw;
+  background-position: 50% 14%, 50% 50%;
+  background-repeat: no-repeat;
+}
+.h-mesa {
+  position: absolute; right: 2%; bottom: 13%; width: 16%; height: 17%;
+  background:
+    linear-gradient(#a8743c, #a8743c) 0 0 / 100% 18% no-repeat,
+    linear-gradient(#8a5a2b, #8a5a2b) 6% 100% / 8% 82% no-repeat,
+    linear-gradient(#8a5a2b, #8a5a2b) 94% 100% / 8% 82% no-repeat;
+}
+
 .h-chao {
   position: absolute; left: 0; right: 0; bottom: 0; height: 13%;
   background: linear-gradient(var(--floor-top), var(--floor-bot));
@@ -218,37 +269,47 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 .balao-nome { display: block; font-family: var(--font-display); color: var(--accent); font-size: 0.9em; line-height: 1.2; }
 .balao-texto { margin: 0; font-weight: 700; text-wrap: pretty; }
 
-.h-nav {
-  position: absolute; right: 2%; bottom: 2.5%;
-  display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px;
-}
-.h-nav button.btn { padding: 8px 14px; font-size: 15px; }
-.h-nav button[hidden] { display: none; }
 
 /* tela inicial, como o menu de um jogo: frase e botão COMEÇAR no centro */
 .h-inicio {
   position: absolute; left: 0; right: 0; top: 0; bottom: 13%; z-index: 1;
   display: none; flex-direction: column; align-items: center; justify-content: center;
   gap: clamp(16px, 3cqw, 32px); padding: 0 6%;
-  background: color-mix(in srgb, var(--scene-top) 70%, transparent);
+  background: color-mix(in srgb, var(--scene-top) 84%, transparent);
   text-align: center;
 }
 .historia.inicio .h-inicio { display: flex; }
-.historia.inicio .balao { display: none; }
+.historia.inicio .balao, .historia.inicio #aluno { display: none; }
+.historia.inicio .h-quadro span, .historia.escolha .h-quadro span { visibility: hidden; }
 .h-inicio-titulo {
   margin: 0; max-width: 18ch;
   font: 700 clamp(28px, 5.2cqw, 64px)/1.1 var(--font-display); color: var(--fg);
   text-wrap: balance;
 }
-.comecar {
+.comecar, .btn-grande {
   font: 800 clamp(20px, 2.8cqw, 34px)/1 var(--font-body); letter-spacing: 0.08em;
   padding: 0.75em 2.2em; border-radius: 999px; cursor: pointer;
   border: 0; background: var(--accent); color: var(--accent-ink);
   box-shadow: 0 6px 0 color-mix(in srgb, var(--accent) 60%, #000);
   animation: chama 1.6s ease-in-out infinite;
 }
-.comecar:hover { filter: brightness(1.06); }
-.comecar:active { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--accent) 60%, #000); animation: none; }
+.comecar:hover, .btn-grande:hover { filter: brightness(1.06); }
+.comecar:active, .btn-grande:active { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--accent) 60%, #000); animation: none; }
+
+/* botões grandes no centro do palco: entrar no simulador e as escolhas do final */
+.h-acao {
+  position: absolute; inset: 0 0 13% 0; z-index: 1;
+  display: none; flex-wrap: wrap; align-content: flex-start; justify-content: center;
+  gap: clamp(12px, 2cqw, 24px); padding: 13.5cqw 6% 0; /* logo abaixo do balão, acima das cabeças */
+  background: color-mix(in srgb, var(--scene-top) 45%, transparent);
+}
+.h-acao:has(button:not([hidden])) { display: flex; }
+.h-acao button[hidden] { display: none; }
+.btn-grande { font-size: clamp(18px, 2.4cqw, 30px); letter-spacing: 0.02em; padding: 0.7em 1.6em; }
+.btn-grande.secundario {
+  background: var(--card); color: var(--fg); animation: none;
+  box-shadow: 0 6px 0 var(--line);
+}
 @keyframes chama { 50% { transform: scale(1.05); } }
 
 /* escolha do personagem, depois do COMEÇAR */
@@ -283,8 +344,8 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 
 /* botão de voz: discreto, no canto de baixo à esquerda do palco */
 .voz {
-  position: absolute; left: 12px; bottom: 12px; z-index: 2;
-  width: 40px; height: 40px; padding: 8px; border-radius: 50%;
+  position: absolute; left: 1.2%; bottom: 2.5%; z-index: 2;
+  width: clamp(40px, 4.2cqw, 56px); height: clamp(40px, 4.2cqw, 56px); padding: clamp(8px, 0.9cqw, 12px); border-radius: 50%;
   display: none; place-items: center;
   border: 1px solid var(--line); background: var(--card); color: var(--muted);
   opacity: 0.85; cursor: pointer;
@@ -311,6 +372,7 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 
 @media (max-width: 600px) {
   .historia { aspect-ratio: auto; height: 460px; }
+  .controls { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -318,6 +380,6 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
   .boneco { transition: none; }
   .boneco svg, .boneco .perna, .boneco .braco, .palpebra, .boca-aberta, .boca-fechada { animation: none !important; }
   .balao { transition: none; }
-  .comecar { animation: none; }
+  .comecar, .btn-grande { animation: none; }
   .card-aluno { transition: none; }
 }

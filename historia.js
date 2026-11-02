@@ -216,7 +216,6 @@
   const balao = document.getElementById("balao");
   const balaoNome = document.getElementById("balao-nome"), balaoTexto = document.getElementById("balao-texto");
   const listaAlunos = document.getElementById("lista-alunos");
-  const btnPular = document.getElementById("pular");
   const btnRever = document.getElementById("rever"), btnUsar = document.getElementById("usar");
   // as duas únicas ações pedidas durante a história: entrar no simulador e voltar dele
   const btnIrSimulador = document.getElementById("ir-simulador"), btnVoltar = document.getElementById("voltar-historia");
@@ -331,11 +330,17 @@
 
   // ---------- Música da tela inicial e da escolha (gerada no navegador, sem arquivo) ----------
   // O navegador só deixa tocar som depois de um clique ou tecla; até lá ela fica esperando.
-  const VOLUME_MUSICA = 0.045;
-  const PASSO_MUSICA = 0.3; // segundos por nota
-  const MELODIA = [72, 76, 79, 76, 74, 79, 81, 79, 72, 76, 79, 81, 79, 76, 74, null];
-  const BAIXO = [48, 45, 41, 43]; // dó, lá, fá, sol: um a cada 4 notas
-  let somCtx = null, musica = null;
+  // ritmo animado mas leve: melodia saltitante, baixo marcando e uma batida suave
+  const VOLUME_MUSICA = 0.05;
+  const PASSO_MUSICA = 0.19; // segundos por passo (colcheia a ~158 bpm)
+  const MELODIA = [
+    72, null, 76, 79, null, 76, 81, 79,
+    77, null, 76, 74, null, 72, 74, null,
+    72, null, 76, 79, null, 81, 84, 81,
+    79, null, 77, 76, 74, null, 72, null,
+  ];
+  const BAIXO = [48, 45, 41, 43]; // dó, lá, fá, sol: um a cada 8 passos
+  let somCtx = null, musica = null, ruido = null;
   const hz = (n) => 440 * Math.pow(2, (n - 69) / 12);
   const telaDeMenu = () => historia.classList.contains("inicio") || historia.classList.contains("escolha");
 
@@ -349,15 +354,69 @@
     osc.start(inicio); osc.stop(inicio + dura + 0.05);
   }
 
+  // chimbal: um estalo curto de ruído
+  function chimbal(inicio, volume) {
+    if (!ruido) {
+      ruido = somCtx.createBuffer(1, somCtx.sampleRate * 0.05, somCtx.sampleRate);
+      const d = ruido.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const src = somCtx.createBufferSource(), filtro = somCtx.createBiquadFilter(), env = somCtx.createGain();
+    src.buffer = ruido; filtro.type = "highpass"; filtro.frequency.value = 7000;
+    env.gain.setValueAtTime(volume, inicio);
+    env.gain.exponentialRampToValueAtTime(0.001, inicio + 0.045);
+    src.connect(filtro).connect(env).connect(musica.saida);
+    src.start(inicio); src.stop(inicio + 0.05);
+  }
+
+  // bumbo: seno que desce rápido de tom
+  function bumbo(inicio, volume) {
+    const osc = somCtx.createOscillator(), env = somCtx.createGain();
+    osc.frequency.setValueAtTime(140, inicio);
+    osc.frequency.exponentialRampToValueAtTime(50, inicio + 0.12);
+    env.gain.setValueAtTime(volume, inicio);
+    env.gain.exponentialRampToValueAtTime(0.001, inicio + 0.18);
+    osc.connect(env).connect(musica.saida);
+    osc.start(inicio); osc.stop(inicio + 0.2);
+  }
+
   function agendaMusica() {
     if (!musica || somCtx.state !== "running") return;
     if (musica.proxima < somCtx.currentTime) musica.proxima = somCtx.currentTime + 0.05;
     while (musica.proxima < somCtx.currentTime + 0.6) {
       const i = musica.i % MELODIA.length, t = musica.proxima;
-      if (MELODIA[i] !== null) nota(hz(MELODIA[i]), t, PASSO_MUSICA * 1.6, "triangle", 0.6);
-      if (i % 4 === 0) nota(hz(BAIXO[(i / 4) % BAIXO.length]), t, PASSO_MUSICA * 4, "sine", 0.9);
+      if (MELODIA[i] !== null) nota(hz(MELODIA[i]), t, PASSO_MUSICA * 1.4, "triangle", 0.55);
+      if (i % 8 === 0) nota(hz(BAIXO[(i / 8) % BAIXO.length]), t, PASSO_MUSICA * 3, "sine", 0.9);
+      if (i % 8 === 4) nota(hz(BAIXO[Math.floor(i / 8) % BAIXO.length] + 7), t, PASSO_MUSICA * 2, "sine", 0.6);
+      if (i % 4 === 0) bumbo(t, 0.7);
+      if (i % 2 === 1) chimbal(t, 0.18);
       musica.i++; musica.proxima += PASSO_MUSICA;
     }
+  }
+
+  // som discreto ao passar o mouse num personagem da escolha (um "tic" suave) e ao escolher
+  function somDeEscolha(indice, confirmar) {
+    if (!vozLigada) return;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    somCtx = somCtx || new Ctx();
+    if (somCtx.state !== "running") return;
+    const t = somCtx.currentTime, saida = somCtx.createGain();
+    saida.gain.value = confirmar ? 0.05 : 0.03;
+    saida.connect(somCtx.destination);
+    const toca = (freq, ini, dura) => {
+      const osc = somCtx.createOscillator(), env = somCtx.createGain();
+      osc.type = "sine"; osc.frequency.value = freq;
+      env.gain.setValueAtTime(0, ini);
+      env.gain.linearRampToValueAtTime(1, ini + 0.005);
+      env.gain.exponentialRampToValueAtTime(0.001, ini + dura);
+      osc.connect(env).connect(saida);
+      osc.start(ini); osc.stop(ini + dura + 0.02);
+    };
+    // todos com o mesmo "tic"; só a altura muda um pouco de um personagem para o outro
+    toca(1100 + indice * 40, t, 0.05);
+    if (confirmar) toca(1500, t + 0.06, 0.08);
+    setTimeout(() => saida.disconnect(), 400);
   }
 
   function tocaMusica() {
@@ -413,11 +472,13 @@
   });
 
   // ---------- Tela de escolha do personagem ----------
-  ALUNOS.forEach((a) => {
+  ALUNOS.forEach((a, i) => {
     const btn = document.createElement("button");
     btn.type = "button"; btn.className = "card-aluno"; btn.id = "aluno-" + a.id;
     btn.innerHTML = `<span class="card-aluno-figura" style="--altura: ${a.altura}">${desenho(a)}</span><span class="card-aluno-nome">${a.nome}</span>`;
-    btn.addEventListener("click", () => { vesteAluno(a); comeca(); });
+    btn.addEventListener("pointerenter", () => somDeEscolha(i, false));
+    btn.addEventListener("focus", () => { if (btn.matches(":focus-visible")) somDeEscolha(i, false); });
+    btn.addEventListener("click", () => { somDeEscolha(i, true); vesteAluno(a); comeca(); });
     listaAlunos.appendChild(btn);
   });
 
@@ -437,12 +498,18 @@
     balao.style.setProperty("--cauda", Math.max(8, Math.min(92, ((cx - bx) / bw) * 100)) + "%");
     balaoNome.textContent = quem.nome;
     balaoTexto.textContent = texto;
+    // fala longa: o balão sobe para a ponta não encostar na cabeça
+    balao.style.top = "";
+    const topoCabeca = el.getBoundingClientRect().top - historia.getBoundingClientRect().top;
+    const sobra = topoCabeca - (balao.offsetTop + balao.offsetHeight) - 22;
+    if (sobra < 0) balao.style.top = Math.max(6, balao.offsetTop + sobra) + "px";
     balao.classList.add("visivel");
     el.classList.remove("pulo");
     void el.offsetWidth; // reinicia o pulinho de quem fala
     el.classList.add("pulo");
     diz(quem, texto, el, () => {
-      if (p.fim) return;
+      // no fim, os botões grandes aparecem só depois da última fala
+      if (p.fim) { btnRever.hidden = btnUsar.hidden = false; return; }
       // antes do simulador a história para e espera o clique em "Ir para o simulador"
       if (PASSOS[passo + 1].seringa) btnIrSimulador.hidden = false;
       else proxima();
@@ -480,8 +547,7 @@
     }
     app.classList.add("modo-historia");
     app.classList.remove("modo-guiado");
-    btnPular.hidden = !!p.fim;
-    btnRever.hidden = btnUsar.hidden = !p.fim;
+    btnRever.hidden = btnUsar.hidden = true;
     if (xAluno() !== p.x) anda(p.x, () => fala(p));
     else fala(p);
   }
@@ -510,7 +576,6 @@
     app.classList.add("modo-historia");
     app.classList.remove("modo-guiado");
     btnRever.hidden = btnUsar.hidden = true;
-    btnPular.hidden = false;
     tocaMusica();
   }
   function escolha() {
@@ -520,7 +585,6 @@
     app.classList.add("modo-historia");
     app.classList.remove("modo-guiado");
     btnRever.hidden = btnUsar.hidden = true;
-    btnPular.hidden = false;
     tocaMusica();
     document.getElementById("aluno-" + aluno.id).focus({ preventScroll: true });
   }
@@ -539,7 +603,6 @@
   }
 
   document.getElementById("comecar").addEventListener("click", escolha);
-  btnPular.addEventListener("click", sai);
   btnUsar.addEventListener("click", sai);
   btnRever.addEventListener("click", escolha);
   btnIrSimulador.addEventListener("click", () => mostra(passo + 1));
