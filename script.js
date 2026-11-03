@@ -290,41 +290,44 @@
     ctx.fillStyle = sg2; ctx.beginPath(); ctx.arc(0, 0, 340, 0, Math.PI * 2); ctx.fill(); ctx.restore();
   }
 
-  // a massinha que saiu vira de frente e se aproxima da tela, mostrando o formato do bico
+  // vista de frente: a câmera fica de frente para o bico e a massinha sai do fundo vindo na direção da tela
   function desenhaDeFrente(ext) {
     const e = estado.f * estado.f * (3 - 2 * estado.f); // suaviza o começo e o fim
     ctx.fillStyle = tema["scene-top"];
-    ctx.globalAlpha = 0.9 * e; ctx.fillRect(0, 0, LW, LH); ctx.globalAlpha = 1;
-    const font = tema.fonte;
-    if (ext < 4) {
-      ctx.globalAlpha = e;
-      ctx.fillStyle = tema.ink; ctx.textAlign = "center"; ctx.font = `800 52px ${font}`;
-      ctx.fillText("Aperte a seringa para a massinha sair", LW / 2, LH / 2);
-      ctx.globalAlpha = 1;
-      return;
-    }
-    // sai da ponta da massinha e vem para o centro, crescendo
-    const ponta = CAM[Math.min(indice(ext), CAM.length - 1)];
-    const cx = ponta[0] + (LW / 2 - ponta[0]) * e, cy = ponta[1] + (LH / 2 + 10 - ponta[1]) * e;
-    const r = R + (250 - R) * e;
+    ctx.globalAlpha = 0.94 * e; ctx.fillRect(0, 0, LW, LH);
     const cor = estado.cor, pts = estado.bico.pts;
-    // profundidade: o comprimento que saiu, visto em perspectiva para o fundo
-    const fundo = Math.min(1, ext / 500) * 95 * e, passos = Math.max(1, Math.round(fundo / 3));
-    for (let k = passos; k >= 1; k--) {
-      const d = (k / passos) * fundo, s = 1 - d / 900;
-      formaEm(cx + d * 0.9, cy - d * 0.7, pts, r * s, 1, 0, 1);
-      ctx.fillStyle = tom(cor, 0.55 + 0.25 * (1 - k / passos)); ctx.fill();
+    const cx = LW / 2 + 90, cy = LH / 2 - 30;
+    // perspectiva: raio = FOCO / distância. O bico fica longe; a ponta da massinha se aproxima
+    const FOCO = 45000, LONGE = 1000;
+    const perto = LONGE - 800 * Math.min(1, ext / (TOTAL * 0.6));
+    const raio = (z) => FOCO / z;
+    // a câmera está um pouco abaixo e à esquerda, para ver os lados da massinha
+    const centro = (z) => [cx + (LONGE - z) * -0.22, cy + (LONGE - z) * 0.17];
+    // bico da seringa lá no fundo, com o furo no formato escolhido
+    const [bx, by] = centro(LONGE), rb = raio(LONGE);
+    ctx.fillStyle = tema.metal; ctx.strokeStyle = tema["glass-line"]; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(bx, by, rb * 1.9, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    formaEm(bx, by, pts, rb, 1, 0, 1);
+    ctx.fillStyle = tom(cor, 0.6); ctx.fill();
+    if (ext >= 4) {
+      // fatias do fundo para a frente: cada uma maior que a anterior
+      const passos = Math.max(2, Math.round((LONGE - perto) / 6));
+      for (let k = 0; k <= passos; k++) {
+        const z = LONGE - ((LONGE - perto) * k) / passos, [x, y] = centro(z);
+        formaEm(x, y, pts, raio(z), 1, 0, 1);
+        ctx.fillStyle = tom(cor, 0.45 + 0.4 * (k / passos)); ctx.fill();
+      }
+      // face da frente, com o formato do bico
+      const [fx, fy] = centro(perto), rf = raio(perto);
+      formaEm(fx, fy, pts, rf, 1, 0, 1);
+      ctx.fillStyle = tom(cor, 1.08); ctx.fill();
+      ctx.lineWidth = 2 + rf / 50; ctx.lineJoin = "round"; ctx.strokeStyle = tom(cor, 0.5); ctx.stroke();
+      formaEm(fx - rf * 0.12, fy - rf * 0.12, pts, rf * 0.45, 1, 0, 1);
+      ctx.fillStyle = "rgba(255,255,255,0.18)"; ctx.fill();
+      ctx.lineJoin = "miter";
     }
-    // face da frente, com o formato do bico
-    formaEm(cx, cy, pts, r, 1, 0, 1);
-    ctx.fillStyle = tom(cor, 1.08); ctx.fill();
-    ctx.lineWidth = 3 + 3 * e; ctx.lineJoin = "round"; ctx.strokeStyle = tom(cor, 0.5); ctx.stroke();
-    formaEm(cx - r * 0.12, cy - r * 0.12, pts, r * 0.45, 1, 0, 1);
-    ctx.fillStyle = "rgba(255,255,255,0.18)"; ctx.fill();
-    ctx.lineJoin = "miter";
-    ctx.globalAlpha = e;
     ctx.fillStyle = tema.ink; ctx.textAlign = "center"; ctx.font = `800 44px ${tema.titulo}`;
-    ctx.fillText(`Massinha vista de frente: ${estado.bico.nome.toLowerCase()}`, LW / 2, 80);
+    ctx.fillText(ext < 4 ? "Aperte a seringa para a massinha sair" : `Massinha vista de frente: ${estado.bico.nome.toLowerCase()}`, LW / 2, 80);
     ctx.globalAlpha = 1;
   }
 

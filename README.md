@@ -32,7 +32,7 @@ Abra o `index.html` no navegador (não precisa instalar nada).
 - **Segure para apertar** (ou segure a barra de espaço): o êmbolo desce e a massinha sai.
 - **Bico da seringa**: estrela, círculo, coração, quadrado, triângulo, fita ou cruz (teclas 1 a 7).
 - **Cor da massinha**: seis cores.
-- **Ver de frente** (tecla F): a massinha que saiu vira de frente e se aproxima da tela, mostrando o formato real (o coração aparece como coração). **Ver de lado** volta.
+- **Ver de frente** (tecla F): a câmera fica de frente para o bico e a massinha sai do fundo vindo na direção da tela, mostrando o formato real (o coração aparece como coração). **Ver de lado** volta.
 - **Encher de novo** (tecla R): recomeça.
 - **Tela cheia**: para mostrar no projetor.
 
