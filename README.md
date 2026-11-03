@@ -13,7 +13,16 @@ Ao abrir a página, começa uma historinha que apresenta a extrusão. Depois do 
 - O botão do alto-falante, no canto de baixo à esquerda, liga e desliga o som (falas e música). A escolha fica salva no navegador.
 - Depois do **Começar**, a história segue sozinha: cada fala começa 1 s depois que a anterior termina.
 - Antes do simulador, a história para e mostra **Ir para o simulador**. No simulador, quem controla é você; nada avança sozinho. Para seguir, clique em **Continuar a história**. Essas são as únicas ações pedidas depois do **COMEÇAR**.
-- No fim da história aparecem **Usar o simulador** e **Ver de novo**. Na tela de escolha, cada personagem toca uma notinha ao passar o mouse.
+- No fim da história aparece **Responder perguntas**. Na tela de escolha, cada personagem toca uma notinha ao passar o mouse.
+
+## Perguntas
+
+Depois da história vêm 5 perguntas sobre extrusão, cada uma com 4 alternativas. O professor Pedro lê a pergunta em voz alta.
+
+- Se você acertar, a alternativa fica verde, aparece a tela verde "Muito bem, você acertou!" e você ganha moedinhas: 3 se acertar de primeira, 2 na segunda tentativa e 1 depois disso.
+- Se você errar, a alternativa fica vermelha e aparece a tela vermelha "Que pena, você errou!" com **Tentar novamente**.
+- No fim aparece o total de moedas, com **Ver de novo** e **Usar o simulador**.
+- As perguntas ficam em `historia.js` (`PERGUNTAS`). `certa` é a posição da resposta certa, contando a partir de 0.
 
 ## Como usar
 

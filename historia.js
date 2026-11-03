@@ -509,7 +509,7 @@
     el.classList.add("pulo");
     diz(quem, texto, el, () => {
       // no fim, os botões grandes aparecem só depois da última fala
-      if (p.fim) { btnRever.hidden = btnUsar.hidden = false; return; }
+      if (p.fim) { btnPerguntas.hidden = false; return; }
       // antes do simulador a história para e espera o clique em "Ir para o simulador"
       if (PASSOS[passo + 1].seringa) btnIrSimulador.hidden = false;
       else proxima();
@@ -559,10 +559,158 @@
     historia.classList.remove("sem-transicao");
   }
 
+  // ---------- Perguntas, depois da história ----------
+  // "certa" é a posição da alternativa correta (0 a 3)
+  const PERGUNTAS = [
+    {
+      enunciado: "O que é a extrusão?",
+      alternativas: [
+        "Derramar o material derretido dentro de um molde fechado",
+        "Empurrar o material através de uma matriz, para ele sair com o formato do furo",
+        "Tirar material de uma peça com uma ferramenta que gira",
+        "Dobrar uma chapa até ela ficar com o formato desejado",
+      ],
+      certa: 1,
+    },
+    {
+      enunciado: "Na seringa de massinha, o bico faz o papel de quê?",
+      alternativas: ["Da matriz", "Do pistão", "Do material", "Do forno"],
+      certa: 0,
+    },
+    {
+      enunciado: "E o êmbolo da seringa, que a gente aperta, representa o quê?",
+      alternativas: ["A matriz", "O produto pronto", "O pistão, que empurra o material", "A esteira que leva as peças"],
+      certa: 2,
+    },
+    {
+      enunciado: "O que define o formato da seção da peça extrudada?",
+      alternativas: ["A cor do material", "A força com que se aperta", "O tamanho do recipiente", "O formato do furo da matriz"],
+      certa: 3,
+    },
+    {
+      enunciado: "Qual destes produtos costuma ser feito por extrusão?",
+      alternativas: ["Perfis de alumínio de janelas", "Parafusos usinados no torno", "Garrafas PET sopradas", "Moedas cunhadas"],
+      certa: 0,
+    },
+  ];
+  const LETRAS = ["A", "B", "C", "D"];
+  const quiz = document.getElementById("quiz");
+  const quizContagem = document.getElementById("quiz-contagem"), quizEnunciado = document.getElementById("quiz-enunciado");
+  const quizAlternativas = document.getElementById("quiz-alternativas");
+  const quizResultado = document.getElementById("quiz-resultado"), quizSimbolo = document.getElementById("quiz-simbolo");
+  const quizResultadoTexto = document.getElementById("quiz-resultado-texto"), quizGanho = document.getElementById("quiz-ganho");
+  const quizSeguir = document.getElementById("quiz-seguir"), quizMoedas = document.getElementById("quiz-moedas-n");
+  const btnPerguntas = document.getElementById("ir-perguntas"), quizSimulador = document.getElementById("quiz-simulador");
+  let pergunta = 0, moedas = 0, tentativas = 0, depoisDoResultado = null;
+
+  // som de acerto (arpejo subindo) e de erro (duas notas descendo)
+  function somDoQuiz(acertou) {
+    if (!vozLigada) return;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    somCtx = somCtx || new Ctx();
+    somCtx.resume().catch(() => {});
+    const t = somCtx.currentTime + 0.02, saida = somCtx.createGain();
+    saida.gain.value = 0.12;
+    saida.connect(somCtx.destination);
+    const notas = acertou ? [[72, 0], [76, 0.09], [79, 0.18], [84, 0.27]] : [[52, 0], [47, 0.22]];
+    notas.forEach(([n, d]) => {
+      const osc = somCtx.createOscillator(), env = somCtx.createGain();
+      osc.type = acertou ? "triangle" : "square";
+      osc.frequency.value = hz(n);
+      const dura = acertou ? 0.35 : 0.3;
+      env.gain.setValueAtTime(0, t + d);
+      env.gain.linearRampToValueAtTime(acertou ? 1 : 0.35, t + d + 0.01);
+      env.gain.exponentialRampToValueAtTime(0.001, t + d + dura);
+      osc.connect(env).connect(saida);
+      osc.start(t + d); osc.stop(t + d + dura + 0.02);
+    });
+    setTimeout(() => saida.disconnect(), 1200);
+  }
+
+  function mostraPergunta(i) {
+    pergunta = i; tentativas = 0;
+    const q = PERGUNTAS[i];
+    quizResultado.className = "quiz-resultado";
+    quizContagem.textContent = `Pergunta ${i + 1} de ${PERGUNTAS.length}`;
+    quizEnunciado.textContent = q.enunciado;
+    quizAlternativas.innerHTML = "";
+    q.alternativas.forEach((texto, j) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "quiz-alt";
+      b.innerHTML = `<span class="quiz-letra">${LETRAS[j]}</span><span class="quiz-alt-texto"></span>`;
+      b.lastChild.textContent = texto;
+      b.addEventListener("click", () => responde(j, b));
+      quizAlternativas.appendChild(b);
+    });
+    quizAlternativas.firstChild.focus({ preventScroll: true });
+    // o professor lê a pergunta e as alternativas
+    const leitura = q.enunciado + " " + q.alternativas.map((t, j) => `${LETRAS[j]}: ${t}.`).join(" ");
+    diz(PEDRO, leitura, elProfessor, () => {});
+  }
+
+  function resultado(acertou, texto, ganho, rotulo, depois) {
+    quizResultado.className = "quiz-resultado visivel " + (acertou ? "certo" : "errado");
+    quizSimulador.hidden = true;
+    quizSimbolo.textContent = acertou ? "✓" : "✕";
+    quizResultadoTexto.textContent = texto;
+    quizGanho.textContent = ganho;
+    quizSeguir.textContent = rotulo;
+    depoisDoResultado = depois;
+    quizSeguir.focus({ preventScroll: true });
+    diz(PEDRO, texto, elProfessor, () => {});
+  }
+
+  function responde(j, b) {
+    const q = PERGUNTAS[pergunta];
+    tentativas++;
+    somDoQuiz(j === q.certa);
+    if (j !== q.certa) {
+      b.classList.add("errada"); b.disabled = true;
+      resultado(false, "Que pena, você errou!", "", "Tentar novamente", () => {
+        quizResultado.className = "quiz-resultado";
+        quizAlternativas.querySelector("button:not(:disabled)").focus({ preventScroll: true });
+      });
+      return;
+    }
+    b.classList.add("certa");
+    quizAlternativas.querySelectorAll("button").forEach((x) => { x.disabled = true; });
+    // de primeira vale 3 moedas, na segunda 2, depois 1
+    const ganho = Math.max(1, 4 - tentativas);
+    moedas += ganho;
+    quizMoedas.textContent = moedas;
+    quizMoedas.parentElement.classList.remove("ganhou");
+    void quizMoedas.offsetWidth;
+    quizMoedas.parentElement.classList.add("ganhou");
+    const ultima = pergunta === PERGUNTAS.length - 1;
+    // espera um instante para a alternativa verde aparecer antes da tela de acerto
+    setTimeout(() => resultado(true, "Muito bem, você acertou!", `+${ganho} ${ganho > 1 ? "moedas" : "moeda"}`,
+      ultima ? "Ver resultado" : "Próxima pergunta",
+      () => (ultima ? fimDoQuiz() : mostraPergunta(pergunta + 1))), 600);
+  }
+
+  function fimDoQuiz() {
+    const max = PERGUNTAS.length * 3;
+    resultado(true, `Parabéns, ${aluno.nome}! Você terminou as perguntas.`, `${moedas} de ${max} moedas`, "Ver de novo", escolha);
+    quizResultado.classList.add("final");
+    quizSimbolo.textContent = "★";
+    quizSimulador.hidden = false;
+  }
+
+  function perguntas() {
+    limpa();
+    moedas = 0; quizMoedas.textContent = "0";
+    historia.classList.add("quiz");
+    mostraPergunta(0);
+  }
+  quizSeguir.addEventListener("click", () => { cala(); depoisDoResultado && depoisDoResultado(); });
+  quizSimulador.addEventListener("click", () => sai());
+
   function limpa() {
     clearTimeout(timer); clearTimeout(espera);
     passo = -1;
-    btnIrSimulador.hidden = true;
+    historia.classList.remove("quiz");
+    btnIrSimulador.hidden = btnPerguntas.hidden = true;
     cala();
     elAluno.classList.remove("andando");
     balao.classList.remove("visivel");
@@ -606,6 +754,7 @@
   btnUsar.addEventListener("click", sai);
   btnRever.addEventListener("click", escolha);
   btnIrSimulador.addEventListener("click", () => mostra(passo + 1));
+  btnPerguntas.addEventListener("click", perguntas);
   btnVoltar.addEventListener("click", () => mostra(passo + 1));
 
   abertura();
