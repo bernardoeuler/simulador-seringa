@@ -30,7 +30,7 @@
   ];
   const PROFESSOR = 74, ENTRADA = -12, INICIO = 22, ANDAR = 1800;
   const PAUSA = 1000; // intervalo entre uma fala e a próxima
-  const VELOCIDADE = 1.6; // velocidade das falas (1 = normal do navegador)
+  const VELOCIDADE = 1.4; // velocidade das falas (1 = normal do navegador)
 
   // ---------- Desenho (viewBox 100 x 200) ----------
   const AZUL_UFC = "#0b4f9c";
