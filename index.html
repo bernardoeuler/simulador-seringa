@@ -40,12 +40,33 @@
           <p class="h-escolha-titulo">Escolha seu personagem</p>
           <div class="h-escolha-lista" id="lista-alunos"></div>
         </div>
+        <div class="h-quiz" id="quiz">
+          <div class="quiz-topo">
+            <span class="quiz-contagem" id="quiz-contagem"></span>
+            <span class="quiz-moedas" id="quiz-moedas" aria-live="polite"><span class="moeda" aria-hidden="true"></span><span id="quiz-moedas-n">0</span></span>
+          </div>
+          <p class="quiz-enunciado" id="quiz-enunciado"></p>
+          <div class="quiz-alternativas" id="quiz-alternativas"></div>
+          <div class="quiz-resultado" id="quiz-resultado" role="alertdialog" aria-labelledby="quiz-resultado-texto">
+            <span class="quiz-simbolo" id="quiz-simbolo" aria-hidden="true"></span>
+            <p class="quiz-resultado-texto" id="quiz-resultado-texto"></p>
+            <p class="quiz-ganho" id="quiz-ganho"></p>
+            <div class="quiz-botoes">
+              <button class="btn-grande" id="quiz-seguir" type="button"></button>
+              <button class="btn-grande secundario" id="quiz-simulador" type="button" hidden>Usar o simulador</button>
+            </div>
+          </div>
+        </div>
         <div class="h-acao">
+          <button class="btn-grande" id="ir-perguntas" type="button" hidden>Responder perguntas</button>
           <button class="btn-grande" id="ir-simulador" type="button" hidden>Ir para o simulador</button>
           <button class="btn-grande" id="usar" type="button" hidden>Usar o simulador</button>
           <button class="btn-grande secundario" id="rever" type="button" hidden>Ver de novo</button>
         </div>
       </div>
+      <button class="avancar" id="avancar" type="button" aria-label="Próxima fala" title="Próxima fala (seta para a direita)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5l8 7-8 7z M16 5h2.5v14H16z" fill="currentColor"/></svg>
+      </button>
       <button class="voz" id="voz" type="button" aria-pressed="true" aria-label="Desligar som" title="Desligar som">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>
@@ -72,6 +93,7 @@
       </div>
       <div class="actions">
         <button class="btn primary" id="apertar" type="button">Segure para apertar</button>
+        <button class="btn" id="frente" type="button" aria-pressed="false">Ver de frente</button>
         <button class="btn" id="encher" type="button">Encher de novo</button>
         <button class="btn" id="tela" type="button">Tela cheia</button>
       </div>

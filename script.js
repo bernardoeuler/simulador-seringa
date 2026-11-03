@@ -120,6 +120,7 @@
     bico: BICOS[0], cor: CORES[0].hex,
     hx: HX0, apertando: false,
     t: 0,
+    frente: false, f: 0, // vista de frente: o pedaço de massinha vira para a tela (f anima de 0 a 1)
   };
   const extrudado = () => (estado.hx - HX0) * K;
 
@@ -289,6 +290,47 @@
     ctx.fillStyle = sg2; ctx.beginPath(); ctx.arc(0, 0, 340, 0, Math.PI * 2); ctx.fill(); ctx.restore();
   }
 
+  // vista de frente: a câmera fica de frente para o bico e a massinha sai do fundo vindo na direção da tela
+  function desenhaDeFrente(ext) {
+    const e = estado.f * estado.f * (3 - 2 * estado.f); // suaviza o começo e o fim
+    ctx.fillStyle = tema["scene-top"];
+    ctx.globalAlpha = 0.94 * e; ctx.fillRect(0, 0, LW, LH);
+    const cor = estado.cor, pts = estado.bico.pts;
+    const cx = LW / 2 + 90, cy = LH / 2 - 30;
+    // perspectiva: raio = FOCO / distância. O bico fica longe; a ponta da massinha se aproxima
+    const FOCO = 45000, LONGE = 1000;
+    const perto = LONGE - 800 * Math.min(1, ext / (TOTAL * 0.6));
+    const raio = (z) => FOCO / z;
+    // a câmera está um pouco abaixo e à esquerda, para ver os lados da massinha
+    const centro = (z) => [cx + (LONGE - z) * -0.22, cy + (LONGE - z) * 0.17];
+    // bico da seringa lá no fundo, com o furo no formato escolhido
+    const [bx, by] = centro(LONGE), rb = raio(LONGE);
+    ctx.fillStyle = tema.metal; ctx.strokeStyle = tema["glass-line"]; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(bx, by, rb * 1.9, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    formaEm(bx, by, pts, rb, 1, 0, 1);
+    ctx.fillStyle = tom(cor, 0.6); ctx.fill();
+    if (ext >= 4) {
+      // fatias do fundo para a frente: cada uma maior que a anterior
+      const passos = Math.max(2, Math.round((LONGE - perto) / 6));
+      for (let k = 0; k <= passos; k++) {
+        const z = LONGE - ((LONGE - perto) * k) / passos, [x, y] = centro(z);
+        formaEm(x, y, pts, raio(z), 1, 0, 1);
+        ctx.fillStyle = tom(cor, 0.45 + 0.4 * (k / passos)); ctx.fill();
+      }
+      // face da frente, com o formato do bico
+      const [fx, fy] = centro(perto), rf = raio(perto);
+      formaEm(fx, fy, pts, rf, 1, 0, 1);
+      ctx.fillStyle = tom(cor, 1.08); ctx.fill();
+      ctx.lineWidth = 2 + rf / 50; ctx.lineJoin = "round"; ctx.strokeStyle = tom(cor, 0.5); ctx.stroke();
+      formaEm(fx - rf * 0.12, fy - rf * 0.12, pts, rf * 0.45, 1, 0, 1);
+      ctx.fillStyle = "rgba(255,255,255,0.18)"; ctx.fill();
+      ctx.lineJoin = "miter";
+    }
+    ctx.fillStyle = tema.ink; ctx.textAlign = "center"; ctx.font = `800 44px ${tema.titulo}`;
+    ctx.fillText(ext < 4 ? "Aperte a seringa para a massinha sair" : `Massinha vista de frente: ${estado.bico.nome.toLowerCase()}`, LW / 2, 80);
+    ctx.globalAlpha = 1;
+  }
+
   // ---------- Laço de animação ----------
   let antes = performance.now();
   const VEL = 95; // px lógicos por segundo do êmbolo
@@ -304,6 +346,9 @@
     desenhaMassinhaFora(ext);
     desenhaSeringa();
     desenhaDetalhe(ext);
+    const alvo = estado.frente ? 1 : 0;
+    estado.f += Math.sign(alvo - estado.f) * Math.min(Math.abs(alvo - estado.f), dt / 0.7);
+    if (estado.f > 0) desenhaDeFrente(ext);
     requestAnimationFrame(quadro);
   }
 
@@ -350,8 +395,17 @@
   cv.addEventListener("pointerup", para);
   cv.addEventListener("pointercancel", para);
 
+  const btnFrente = document.getElementById("frente");
+  function viraDeFrente(sim) {
+    estado.frente = sim;
+    btnFrente.setAttribute("aria-pressed", String(sim));
+    btnFrente.textContent = sim ? "Ver de lado" : "Ver de frente";
+  }
+  btnFrente.addEventListener("click", () => viraDeFrente(!estado.frente));
+
   function encher() {
     estado.hx = HX0; estado.apertando = false;
+    viraDeFrente(false);
   }
   document.getElementById("encher").addEventListener("click", encher);
 
@@ -366,6 +420,7 @@
     if (app.classList.contains("modo-historia")) return; // a seringa fica escondida durante a história
     if (e.code === "Space") { e.preventDefault(); if (!e.repeat) comeca(); }
     else if (e.key === "r" || e.key === "R") encher();
+    else if (e.key === "f" || e.key === "F") viraDeFrente(!estado.frente);
     else if (/^[1-7]$/.test(e.key)) escolheBico(Number(e.key) - 1);
   });
   document.addEventListener("keyup", (e) => { if (e.code === "Space") para(); });
