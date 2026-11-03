@@ -14,7 +14,7 @@ Ao abrir a página, começa uma historinha que apresenta a extrusão. Depois do 
 - Depois do **Começar**, a história segue sozinha: cada fala começa 1 s depois que a anterior termina.
 - Antes do simulador, a história para e mostra **Ir para o simulador**. No simulador, quem controla é você; nada avança sozinho. Para seguir, clique em **Continuar a história**. Essas são as únicas ações pedidas depois do **COMEÇAR**.
 - O botão ▶ no canto de baixo à direita (ou a seta para a direita do teclado) pula para a próxima fala.
-- No fim da história aparece **Responder perguntas**. Na tela de escolha, cada personagem toca uma notinha ao passar o mouse.
+- No fim da história aparece só **Responder perguntas**. Na tela de escolha, cada personagem toca uma notinha ao passar o mouse.
 
 ## Perguntas
 

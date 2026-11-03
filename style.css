@@ -280,7 +280,7 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 }
 .historia.inicio .h-inicio { display: flex; }
 .historia.inicio .balao, .historia.inicio #aluno { display: none; }
-.historia.inicio .h-quadro span, .historia.escolha .h-quadro span { visibility: hidden; }
+.historia.inicio .h-quadro span, .historia.escolha .h-quadro span, .historia.quiz .h-quadro span { visibility: hidden; }
 .h-inicio-titulo {
   margin: 0; max-width: 18ch;
   font: 700 clamp(28px, 5.2cqw, 64px)/1.1 var(--font-display); color: var(--fg);
@@ -393,8 +393,8 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 .quiz-moedas.ganhou { animation: ganhou 0.6s ease-out; }
 @keyframes ganhou { 30% { transform: scale(1.3); } }
 .quiz-enunciado {
-  margin: 0; max-width: 28ch; text-align: center; text-wrap: balance;
-  font: 700 clamp(22px, 3.6cqw, 46px)/1.15 var(--font-display); color: var(--fg);
+  margin: 0; max-width: 30ch; text-align: center; text-wrap: balance;
+  font: 700 clamp(22px, 4.2cqw, 54px)/1.15 var(--font-display); color: var(--fg);
 }
 .quiz-alternativas {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -403,7 +403,7 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 .quiz-alt {
   display: flex; align-items: center; gap: 0.7em; text-align: left;
   padding: 0.7em 0.9em; border-radius: 16px; cursor: pointer;
-  font: 700 clamp(14px, 1.9cqw, 24px)/1.2 var(--font-body);
+  font: 700 clamp(14px, 2.3cqw, 30px)/1.2 var(--font-body);
   border: 3px solid var(--line); background: var(--card); color: var(--fg);
   transition: transform 0.15s, border-color 0.15s, background 0.15s;
 }
@@ -418,8 +418,8 @@ button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 .quiz-alt.certa .quiz-letra, .quiz-alt.errada .quiz-letra { color: #fff; font-size: 0; }
 .quiz-alt.certa .quiz-letra { background: var(--certo); }
 .quiz-alt.errada .quiz-letra { background: var(--errado); }
-.quiz-alt.certa .quiz-letra::before { content: "✓"; font-size: clamp(14px, 1.9cqw, 24px); }
-.quiz-alt.errada .quiz-letra::before { content: "✕"; font-size: clamp(14px, 1.9cqw, 24px); }
+.quiz-alt.certa .quiz-letra::before { content: "✓"; font-size: clamp(14px, 2.3cqw, 30px); }
+.quiz-alt.errada .quiz-letra::before { content: "✕"; font-size: clamp(14px, 2.3cqw, 30px); }
 
 /* tela de acerto (verde) ou erro (vermelha) por cima da pergunta */
 .quiz-resultado {
