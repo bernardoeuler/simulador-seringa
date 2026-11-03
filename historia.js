@@ -216,7 +216,6 @@
   const balao = document.getElementById("balao");
   const balaoNome = document.getElementById("balao-nome"), balaoTexto = document.getElementById("balao-texto");
   const listaAlunos = document.getElementById("lista-alunos");
-  const btnRever = document.getElementById("rever"), btnUsar = document.getElementById("usar");
   // as duas únicas ações pedidas durante a história: entrar no simulador e voltar dele
   const btnIrSimulador = document.getElementById("ir-simulador"), btnVoltar = document.getElementById("voltar-historia");
   const guiaTexto = document.getElementById("guia-texto");
@@ -560,7 +559,6 @@
     }
     app.classList.add("modo-historia");
     app.classList.remove("modo-guiado");
-    btnRever.hidden = btnUsar.hidden = true;
     if (xAluno() !== p.x) anda(p.x, () => fala(p));
     else fala(p);
   }
@@ -736,7 +734,6 @@
     historia.classList.add("inicio");
     app.classList.add("modo-historia");
     app.classList.remove("modo-guiado");
-    btnRever.hidden = btnUsar.hidden = true;
     tocaMusica();
   }
   function escolha() {
@@ -745,7 +742,6 @@
     historia.classList.add("escolha");
     app.classList.add("modo-historia");
     app.classList.remove("modo-guiado");
-    btnRever.hidden = btnUsar.hidden = true;
     tocaMusica();
     document.getElementById("aluno-" + aluno.id).focus({ preventScroll: true });
   }
@@ -764,8 +760,6 @@
   }
 
   document.getElementById("comecar").addEventListener("click", escolha);
-  btnUsar.addEventListener("click", sai);
-  btnRever.addEventListener("click", escolha);
   btnIrSimulador.addEventListener("click", () => mostra(passo + 1));
   btnPerguntas.addEventListener("click", perguntas);
   btnVoltar.addEventListener("click", () => mostra(passo + 1));
