@@ -516,6 +516,19 @@
     });
   }
 
+  // botão de avançar: termina a fala na hora e já mostra a próxima
+  function avanca() {
+    if (!app.classList.contains("modo-historia") || historia.matches(".inicio, .escolha, .quiz")) return;
+    const f = falaAtual;
+    if (f) {
+      silencia(); falaAtual = null; calaBoca();
+      f.depois();
+    }
+    if (espera) { clearTimeout(espera); espera = 0; mostra(passo + 1); }
+  }
+  document.getElementById("avancar").addEventListener("click", avanca);
+  document.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") avanca(); });
+
   function proxima() {
     clearTimeout(espera);
     espera = setTimeout(() => mostra(passo + 1), PAUSA);
@@ -532,7 +545,7 @@
   function mostra(i) {
     passo = i;
     const p = PASSOS[i];
-    clearTimeout(espera);
+    clearTimeout(espera); espera = 0;
     cala();
     btnIrSimulador.hidden = true;
     if (p.seringa) {
